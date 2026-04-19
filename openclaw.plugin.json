@@ -1,0 +1,28 @@
+{
+  "id": "onepilot",
+  "name": "Onepilot",
+  "description": "Bridges Onepilot iOS messages to OpenClaw agents via Supabase Realtime. Survives iOS force-quits and background termination by running the agent loop server-side.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "accounts": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "supabaseUrl": { "type": "string", "format": "uri" },
+            "supabaseAnonKey": { "type": "string", "minLength": 1 },
+            "userId": { "type": "string", "minLength": 1 },
+            "agentProfileId": { "type": "string", "minLength": 1 },
+            "sessionKey": { "type": "string", "minLength": 1 },
+            "userRefreshToken": { "type": "string", "minLength": 1 }
+          },
+          "required": ["supabaseUrl", "supabaseAnonKey", "userId", "agentProfileId", "sessionKey"]
+        }
+      }
+    }
+  }
+}
