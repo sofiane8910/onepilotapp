@@ -1,6 +1,6 @@
 {
   "name": "openclaw-onepilot-channel",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "OpenClaw channel plugin that bridges Onepilot iOS messages to the agent via Supabase Realtime",
   "type": "module",
   "main": "./src/index.js",
