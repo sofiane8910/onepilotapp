@@ -104,6 +104,19 @@ export default definePluginEntry({
                 return a ? { accountId, ...a } : null;
               },
               isEnabled: (account) => account?.enabled !== false,
+              // Onepilot routing is fully baked into the account config
+              // (userId + agentProfileId + sessionKey) — there's no per-
+              // recipient address like a phone number. When the outbound
+              // dispatcher asks for a default target (e.g. cron jobs
+              // created without `--to`), hand back the account's
+              // sessionKey. Otherwise openclaw throws
+              // "Delivering to Onepilot requires target" before sendText
+              // is ever invoked. (See openclaw/src/infra/outbound/targets.ts:223.)
+              resolveDefaultTo: ({ cfg, accountId }) => {
+                const accounts = readAccounts(cfg);
+                const id = accountId ?? Object.keys(accounts)[0];
+                return accounts[id]?.sessionKey ?? "main";
+              },
             },
             outbound: {
               deliveryMode: "direct",
