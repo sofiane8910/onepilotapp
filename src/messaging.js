@@ -87,6 +87,28 @@ export async function handleUserMessage(params) {
   // uses as `sessionKey` (matching `resolveDefaultTo` in the channel's
   // config adapter). Sending it explicitly avoids a second round-trip
   // through the dispatcher when no `to` is set on the cron job.
+  // x-openclaw-session-key gives the agent's runtime a peer-shaped session
+  // key (`agent:<agentId>:onepilot:direct:<userId>`) instead of openclaw's
+  // default `agent:<agentId>:openai:<uuid>` (built by
+  // `gateway/http-utils.ts:78` from the openai-http session prefix).
+  //
+  // Why the shape matters: the cron tool's `inferDeliveryFromSessionKey`
+  // (`openclaw/src/agents/tools/cron-tool.ts:157-208`) parses session keys
+  // and auto-fills `delivery: { mode: "announce", channel, to }` whenever
+  // it sees the `<channel>:direct:<peerId>` pattern. That's why Telegram
+  // users never have to say "send it to my Telegram" — the cron delivery
+  // pre-fills from their session key. Without this header our session
+  // keys lacked the `:direct:<peerId>` marker and the agent had to invent
+  // a delivery shape from scratch (often picking the wrong one).
+  //
+  // agentId comes from OPENCLAW_PROFILE (set by `openclaw --profile <id>`
+  // gateway run, see openclaw/src/cli/gateway-cli/shared.ts:68). Fallback
+  // to "default" so the header still works in non-profile setups.
+  // peerId is the iOS user's UUID (lowercased — openclaw lowercases peer
+  // ids before comparing, see routing/session-key.ts:153).
+  const agentId = (process.env.OPENCLAW_PROFILE ?? "default").trim().toLowerCase();
+  const peerId = String(account.userId).trim().toLowerCase();
+  const peerSessionKey = `agent:${agentId}:onepilot:direct:${peerId}`;
   let reply;
   try {
     const res = await fetch(`http://127.0.0.1:${gatewayPort}/v1/chat/completions`, {
@@ -97,6 +119,7 @@ export async function handleUserMessage(params) {
         "x-openclaw-message-channel": "onepilot",
         "x-openclaw-account-id": accountId,
         "x-openclaw-message-to": userMessageRow.session_key ?? account.sessionKey,
+        "x-openclaw-session-key": peerSessionKey,
       },
       body: JSON.stringify({
         model: "openclaw", // gateway ignores; uses its configured default
