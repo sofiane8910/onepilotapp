@@ -69,6 +69,24 @@ export async function handleUserMessage(params) {
   }
 
   // Fire the agent via the local gateway. `stream: false` gets us a single JSON.
+  //
+  // The `x-openclaw-message-channel: onepilot` header tells openclaw's
+  // session/runtime layer that this turn belongs to the `onepilot` channel.
+  // Without it, openclaw classifies any `/v1/chat/completions` caller as
+  // `webchat` (its built-in WebChat UI client name), which is the
+  // INTERNAL_MESSAGE_CHANNEL marker. The agent then inherits `webchat`
+  // as its `currentChannelId`, and any cron it sets up gets
+  // `delivery.channel = "webchat"`. That fails on the next tick because
+  // openclaw hard-blocks delivery to WebChat
+  // (`infra/outbound/targets.ts:192-198`). Setting the header is enough
+  // to flip the agent's channel context to `onepilot` so crons inherit
+  // the correct, deliverable channel automatically — no agent-prompt
+  // hacks, no SOUL.md edits.
+  //
+  // `x-openclaw-message-to` carries the routing key our outbound channel
+  // uses as `sessionKey` (matching `resolveDefaultTo` in the channel's
+  // config adapter). Sending it explicitly avoids a second round-trip
+  // through the dispatcher when no `to` is set on the cron job.
   let reply;
   try {
     const res = await fetch(`http://127.0.0.1:${gatewayPort}/v1/chat/completions`, {
@@ -76,6 +94,9 @@ export async function handleUserMessage(params) {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${gatewayToken}`,
+        "x-openclaw-message-channel": "onepilot",
+        "x-openclaw-account-id": accountId,
+        "x-openclaw-message-to": userMessageRow.session_key ?? account.sessionKey,
       },
       body: JSON.stringify({
         model: "openclaw", // gateway ignores; uses its configured default
