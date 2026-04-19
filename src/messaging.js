@@ -102,15 +102,8 @@ export async function handleUserMessage(params) {
   // keys lacked the `:direct:<peerId>` marker and the agent had to invent
   // a delivery shape from scratch (often picking the wrong one).
   //
-  // agentId comes from OPENCLAW_PROFILE (set by `openclaw --profile <id>`
-  // gateway run, see openclaw/src/cli/gateway-cli/shared.ts:68). The read
-  // lives in env.js — a network-free module — because openclaw's install-
-  // time security scanner flags any file that combines `process.env` with
-  // a `fetch` call as critical "env-harvesting" and blocks the install
-  // (skill-scanner.ts:197-204). messaging.js does fetch, so the env read
-  // CANNOT be inlined here.
-  // peerId is the iOS user's UUID (lowercased — openclaw lowercases peer
-  // ids before comparing, see routing/session-key.ts:153).
+  // agentId resolution lives in env.js. peerId lowercased for routing.
+  // Rationale + scanner gotcha documented in ../CLAUDE.md.
   const agentId = getAgentId();
   const peerId = String(account.userId).trim().toLowerCase();
   const peerSessionKey = `agent:${agentId}:onepilot:direct:${peerId}`;
