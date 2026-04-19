@@ -18,7 +18,8 @@
             "userId": { "type": "string", "minLength": 1 },
             "agentProfileId": { "type": "string", "minLength": 1 },
             "sessionKey": { "type": "string", "minLength": 1 },
-            "userRefreshToken": { "type": "string", "minLength": 1 }
+            "userRefreshToken": { "type": "string", "minLength": 1 },
+            "pluginJwt": { "type": "string", "minLength": 1 }
           },
           "required": ["supabaseUrl", "supabaseAnonKey", "userId", "agentProfileId", "sessionKey"]
         }

@@ -10,8 +10,9 @@
 //   - we already have the persistence path wired (openclaw-message-ingest
 //     edge function + DB trigger → push-notify). No new code on the Supabase side.
 
+import { WEBHOOK_AUTH_KEY } from "./constants.js";
+
 const HISTORY_LIMIT = 20;
-const WEBHOOK_AUTH_KEY = "onepilot-openclaw-sync-v1"; // mirrors OpenClawAdapter.webhookAuthKey
 
 /**
  * @param {{

@@ -18,6 +18,7 @@
 import { definePluginEntry } from "openclaw/plugin-sdk/core";
 import { startRealtimeSubscription } from "./realtime.js";
 import { handleUserMessage } from "./messaging.js";
+import { sendOnepilotText } from "./outbound.js";
 
 // Module-level dedupe. OpenClaw calls `register` multiple times per gateway
 // lifetime (once per registration mode, plus re-registrations after config
@@ -26,6 +27,10 @@ import { handleUserMessage } from "./messaging.js";
 // handler that corrupts `workspace-state.json`. Keep one subscription per
 // accountId, ever, per process.
 const _activeSubscriptions = new Map();
+
+// Same shape: register the outbound `onepilot` channel exactly once per
+// gateway process, regardless of how many times `register` is invoked.
+let _channelRegistered = false;
 
 export default definePluginEntry({
   id: "onepilot",
@@ -64,6 +69,65 @@ export default definePluginEntry({
       );
     }
 
+    // Register `onepilot` as a real outbound channel so OpenClaw's cron
+    // (and any other outbound delivery path) can dispatch to it. Without
+    // this, cron jobs fail at fire-time with "channel is required" because
+    // the channel resolver can't find an `onepilot` entry in the registry.
+    // Inbound stays on the Realtime subscription below — the channel is
+    // outbound-only.
+    if (!_channelRegistered && typeof api.registerChannel === "function") {
+      try {
+        // ChannelPlugin requires a `config` adapter even for outbound-only
+        // plugins: openclaw's listConfiguredMessageChannels iterates every
+        // registered plugin and calls plugin.config.listAccountIds(cfg) when
+        // resolving the default delivery channel. Without it we'd crash any
+        // auto-resolution path. Read from the same path iOS writes to —
+        // `plugins.entries.onepilot.config.accounts` — so the adapter sees
+        // the live config, not the snapshot captured at register() time.
+        const readAccounts = (cfg) =>
+          cfg?.plugins?.entries?.onepilot?.config?.accounts ??
+          cfg?.plugins?.entries?.onepilot?.accounts ??
+          {};
+
+        api.registerChannel({
+          plugin: {
+            id: "onepilot",
+            meta: {
+              id: "onepilot",
+              label: "Onepilot",
+              description: "Delivers to the Onepilot iOS app via Supabase.",
+            },
+            config: {
+              listAccountIds: (cfg) => Object.keys(readAccounts(cfg)),
+              resolveAccount: (cfg, accountId) => {
+                const a = readAccounts(cfg)[accountId];
+                return a ? { accountId, ...a } : null;
+              },
+              isEnabled: (account) => account?.enabled !== false,
+            },
+            outbound: {
+              deliveryMode: "direct",
+              sendText: (ctx) =>
+                sendOnepilotText({
+                  ctx,
+                  accounts,
+                  log: (m, err) => {
+                    if (err) api.logger.warn?.(`[onepilot:outbound] ${m}: ${String(err)}`);
+                    else api.logger.info?.(`[onepilot:outbound] ${m}`);
+                  },
+                }),
+            },
+          },
+        });
+        _channelRegistered = true;
+        log("registered outbound channel `onepilot`");
+      } catch (err) {
+        warn("registerChannel failed — cron delivery will not work", err);
+      }
+    } else if (typeof api.registerChannel !== "function") {
+      warn("api.registerChannel unavailable — OpenClaw too old? cron delivery will not work");
+    }
+
     const subscriptions = [];
 
     for (const [accountId, account] of Object.entries(accounts)) {
@@ -76,8 +140,16 @@ export default definePluginEntry({
         continue;
       }
       const missing = [];
-      for (const field of ["supabaseUrl", "supabaseAnonKey", "userId", "agentProfileId", "sessionKey", "userRefreshToken"]) {
+      for (const field of ["supabaseUrl", "supabaseAnonKey", "userId", "agentProfileId", "sessionKey"]) {
         if (!account?.[field]) missing.push(field);
+      }
+      // Auth: `pluginJwt` (long-lived per-agent JWT minted by the
+      // mint-plugin-jwt edge function) is the preferred credential — it
+      // avoids the shared-session refresh_token rotation race that wedged
+      // multi-agent setups. `userRefreshToken` is still accepted for
+      // backwards compatibility with installs that predate the switch.
+      if (!account?.pluginJwt && !account?.userRefreshToken) {
+        missing.push("pluginJwt or userRefreshToken");
       }
       if (missing.length > 0) {
         warn(`[${accountId}] missing required config fields: ${missing.join(", ")}`);
@@ -90,12 +162,11 @@ export default definePluginEntry({
           `agent=${String(account.agentProfileId).slice(0, 8)}`,
       );
 
-      // Shared state for access token — shared between Realtime (for auth) and messaging (for REST).
-      let cachedAccessToken = null;
+      // Shared access-token state for Realtime (auth) and messaging (REST).
+      // With `pluginJwt` set, the token is static — no refresh flow needed.
+      let cachedAccessToken = account.pluginJwt ?? null;
       const getAccessToken = () => {
         if (cachedAccessToken) return Promise.resolve(cachedAccessToken);
-        // Realtime layer refreshes on its own cadence; if we got here before
-        // the first refresh, trigger one manually.
         return refreshAccessToken(account).then((t) => {
           cachedAccessToken = t;
           return t;
@@ -113,6 +184,7 @@ export default definePluginEntry({
         supabaseUrl: account.supabaseUrl,
         supabaseAnonKey: account.supabaseAnonKey,
         userRefreshToken: account.userRefreshToken,
+        staticAccessToken: account.pluginJwt,
         userId: userIdLc,
         schema: "public",
         table: "messages",

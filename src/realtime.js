@@ -76,7 +76,33 @@ export function startRealtimeSubscription(config) {
   let stopped = false;
   let currentBackoffMs = 1000;
 
+  // `staticAccessToken`: a long-lived JWT minted by the iOS client via the
+  // `mint-plugin-jwt` edge function. When present, we skip the entire
+  // refresh_token flow — the token is used directly until it expires (90
+  // days by default), at which point iOS re-mints + re-writes the config on
+  // next deploy or chat-open. This sidesteps the "refresh_token_already_used"
+  // wedge that occurred when multiple plugins shared one user session.
+  const hasStaticToken = typeof config.staticAccessToken === "string" && config.staticAccessToken.length > 0;
+  if (hasStaticToken) {
+    accessToken = config.staticAccessToken;
+    // Parse exp out of the JWT so the connection does a timely close-reconnect
+    // before the server kicks us. Don't crash if parsing fails — fall back to
+    // a long timeout so we still close eventually.
+    try {
+      const claims = JSON.parse(Buffer.from(config.staticAccessToken.split(".")[1], "base64url").toString("utf8"));
+      if (claims?.exp) tokenExpMs = claims.exp * 1000;
+    } catch { /* noop */ }
+    if (!tokenExpMs) tokenExpMs = Date.now() + 60 * 60 * 1000;
+    config.onAccessToken?.(accessToken);
+  }
+
   async function refreshJwt() {
+    if (hasStaticToken) {
+      // Static token mode: nothing to refresh. If we're here it means the
+      // token has expired — abort and let the plugin stay quiet until iOS
+      // re-mints + re-deploys.
+      throw new Error("static plugin jwt expired; re-deploy agent from iOS to mint a fresh one");
+    }
     const url = `${config.supabaseUrl}/auth/v1/token?grant_type=refresh_token`;
     const res = await fetch(url, {
       method: "POST",
@@ -213,7 +239,10 @@ export function startRealtimeSubscription(config) {
       log("ws open, joining channel");
       currentBackoffMs = 1000; // reset backoff
       scheduleHeartbeat();
-      scheduleTokenRefresh();
+      // With a static long-lived JWT there's nothing to refresh — the plugin
+      // just stays connected until expiry, at which point the server boots
+      // the socket and iOS re-mints on next deploy.
+      if (!hasStaticToken) scheduleTokenRefresh();
 
       const topic = `realtime:${config.schema}:${config.table}`;
       const joinRef = String(refCounter++);
