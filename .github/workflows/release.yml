@@ -1,0 +1,57 @@
+name: Release plugin tarball
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set version
+        id: ver
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Pack plugin
+        id: pack
+        run: |
+          TAG="${{ steps.ver.outputs.tag }}"
+          # npm pack respects `files` in package.json — produces a npm-style
+          # tarball with package/ as top-level. Good for tar --strip-components=1.
+          npm pack --silent
+          # Rename to a predictable filename the client can template.
+          ORIG=$(ls openclaw-onepilot-channel-*.tgz | head -1)
+          OUT="onepilot-channel-${TAG}.tgz"
+          mv "$ORIG" "$OUT"
+          SHA=$(sha256sum "$OUT" | awk '{print $1}')
+          echo "tarball=$OUT" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.tag }}
+          body: |
+            Plugin tarball for Onepilot iOS + OpenClaw channel bridge.
+
+            ## Integrity
+
+            ```
+            sha256: ${{ steps.pack.outputs.sha256 }}
+            ```
+
+            ## Install
+
+            Users don't install this manually. The Onepilot app picks up new
+            releases via its `plugin_manifest` backend row — push a fix,
+            bump the manifest, agents update on next start.
+          files: ${{ steps.pack.outputs.tarball }}
