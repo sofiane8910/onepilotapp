@@ -35,10 +35,14 @@ export async function sendOnepilotText({ ctx, accounts, log }) {
     throw new Error(`onepilot: no account "${accountId}" configured`);
   }
 
-  // ctx.to optionally overrides sessionKey (the cron --to flag). When the
-  // agent omits it, we deliver into the account's default session ("main").
-  const sessionKey =
-    typeof ctx.to === "string" && ctx.to.length > 0 ? ctx.to : account.sessionKey;
+  // Onepilot is one-agent-one-thread: every outbound message lands in the
+  // account's single session (usually "main"), regardless of any `ctx.to`
+  // the cron tool auto-inferred from the agent's peer session key. The
+  // cron tool's inferDeliveryFromSessionKey fills `delivery.to` with the
+  // recipient's userId (from the `:direct:<userId>` suffix), which used
+  // to get written here as session_key — creating a ghost session keyed
+  // on the userId that never surfaced in the iOS chat list.
+  const sessionKey = account.sessionKey;
 
   const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
   const res = await fetch(ingestUrl, {
