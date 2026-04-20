@@ -31,6 +31,11 @@ const _activeSubscriptions = new Map();
 // gateway process, regardless of how many times `register` is invoked.
 let _channelRegistered = false;
 
+// Per-account access-token getter. Populated when each subscription starts
+// (so it shares the live, rotated token from the realtime refresh flow).
+// Outbound reads from here at send-time.
+const _accountTokenGetters = new Map();
+
 export default definePluginEntry({
   id: "onepilot",
   name: "Onepilot",
@@ -123,6 +128,15 @@ export default definePluginEntry({
                 sendOnepilotText({
                   ctx,
                   accounts,
+                  getAccessToken: async (id) => {
+                    const getter = _accountTokenGetters.get(id);
+                    if (!getter) {
+                      throw new Error(
+                        `onepilot: no access-token getter for account "${id}" (subscription not yet started)`,
+                      );
+                    }
+                    return getter();
+                  },
                   log: (m, err) => {
                     if (err) api.logger.warn?.(`[onepilot:outbound] ${m}: ${String(err)}`);
                     else api.logger.info?.(`[onepilot:outbound] ${m}`);
@@ -174,8 +188,9 @@ export default definePluginEntry({
           `agent=${String(account.agentProfileId).slice(0, 8)}`,
       );
 
-      // Shared access-token state for Realtime (auth) and messaging (REST).
-      // With `pluginJwt` set, the token is static — no refresh flow needed.
+      // Shared access-token state for Realtime (auth) and messaging (REST)
+      // and outbound. With `pluginJwt` set, the token is static — no refresh
+      // flow needed.
       let cachedAccessToken = account.pluginJwt ?? null;
       const getAccessToken = () => {
         if (cachedAccessToken) return Promise.resolve(cachedAccessToken);
@@ -184,6 +199,7 @@ export default definePluginEntry({
           return t;
         });
       };
+      _accountTokenGetters.set(accountId, getAccessToken);
 
       // Postgres UUIDs are stored lowercase. iOS sends uppercase (Swift's
       // default uuidString format), which causes Realtime's string-compare

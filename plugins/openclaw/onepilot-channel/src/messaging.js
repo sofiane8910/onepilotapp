@@ -10,7 +10,6 @@
 //   - we already have the persistence path wired (ingest endpoint → push
 //     trigger). No new backend code.
 
-import { WEBHOOK_AUTH_KEY } from "./constants.js";
 import { getAgentId } from "./env.js";
 
 const HISTORY_LIMIT = 20;
@@ -143,13 +142,16 @@ export async function handleUserMessage(params) {
   }
 
   // Deliver the reply back via the ingest endpoint.
+  // Auth: user's own access token (reused from the refresh flow). The ingest
+  // endpoint verifies the token belongs to the userId we claim in the body.
   try {
+    const ingestJwt = await getAccessToken();
     const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
     const deliverRes = await fetch(ingestUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${WEBHOOK_AUTH_KEY}`,
+        "Authorization": `Bearer ${ingestJwt}`,
       },
       body: JSON.stringify({
         userId: account.userId,

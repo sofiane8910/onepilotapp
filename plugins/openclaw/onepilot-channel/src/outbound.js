@@ -9,8 +9,6 @@
 // (messaging.js): POST to the ingest endpoint, which persists the message
 // and triggers the push notification.
 
-import { WEBHOOK_AUTH_KEY } from "./constants.js";
-
 /**
  * @param {{
  *   ctx: {
@@ -25,10 +23,11 @@ import { WEBHOOK_AUTH_KEY } from "./constants.js";
  *     agentProfileId: string,
  *     sessionKey: string,
  *   }>,
+ *   getAccessToken: (accountId: string) => Promise<string>,
  *   log: (msg: string, err?: unknown) => void,
  * }} params
  */
-export async function sendOnepilotText({ ctx, accounts, log }) {
+export async function sendOnepilotText({ ctx, accounts, getAccessToken, log }) {
   const accountId = ctx.accountId ?? Object.keys(accounts)[0] ?? "default";
   const account = accounts[accountId];
   if (!account) {
@@ -41,15 +40,20 @@ export async function sendOnepilotText({ ctx, accounts, log }) {
   // cron tool's inferDeliveryFromSessionKey fills `delivery.to` with the
   // recipient's userId (from the `:direct:<userId>` suffix), which used
   // to get written here as session_key — creating a ghost session keyed
-  // on the userId that never surfaced in the iOS chat list.
+  // on the userId that never surfaced in the chat list.
   const sessionKey = account.sessionKey;
+
+  // Auth: user's own access token. The ingest endpoint verifies the token
+  // belongs to the userId we claim in the body — so a stolen token from
+  // one user can't inject messages into another user's inbox.
+  const jwt = await getAccessToken(accountId);
 
   const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
   const res = await fetch(ingestUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${WEBHOOK_AUTH_KEY}`,
+      Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({
       userId: account.userId,
