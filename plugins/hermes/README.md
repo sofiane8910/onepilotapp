@@ -19,5 +19,3 @@ Want to help, or want it faster? [Open an issue](https://github.com/sofiane8910/
 - Chat threads in Onepilot, backed by Hermes's persistent memory.
 - Push alerts when the agent proactively reaches out.
 - Skill triggers from the phone (tap → agent runs a learned skill).
-
-See [../../VISION.md](../../VISION.md) for the full integration rationale.

@@ -19,8 +19,3 @@ The first mobile surface for a Paperclip company:
 
 Want to help, or want it faster? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new?title=integration:%20paperclip).
 
-## Positioning
-
-Paperclip is pitched as a framework for "zero-human companies." Onepilot turns that into a **one-human, one-phone company** — you, your phone, and the team of agents that does the rest.
-
-See [../../VISION.md](../../VISION.md) for the full integration rationale.

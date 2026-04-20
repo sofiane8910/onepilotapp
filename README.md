@@ -72,7 +72,7 @@ graph TB
 | [**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | 🚧 Next | Persistent-memory chat, multi-channel gateway mirror |
 | [**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
 
-Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new) or jump into [VISION.md](./VISION.md) for the roadmap.
+Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new).
 
 <br>
 
@@ -97,16 +97,6 @@ git push origin <framework>/<plugin>@v1.2.3
 ```
 
 The CI workflow picks up the tag, packs the right subdirectory, and uploads the tarball as a GitHub release asset. Done.
-
-<br>
-
-## Why Onepilot exists
-
-Every agent framework today assumes you live in a terminal. You don't. You live on your phone, in meetings, walking around. Agents run 24/7 — they should be reachable the same way your team is.
-
-Onepilot is one app that speaks every framework. The more frameworks we support, the less lock-in for anyone building agents.
-
-Read [VISION.md](./VISION.md) for the full story.
 
 <br>
 
