@@ -48,6 +48,13 @@ export async function sendOnepilotText({ ctx, accounts, getAccessToken, log }) {
   // one user can't inject messages into another user's inbox.
   const jwt = await getAccessToken(accountId);
 
+  // Normalize UUIDs to lowercase before sending. Swift emits uppercase
+  // UUIDs by default; the backend stores the canonical lowercase form.
+  // See CLAUDE.md "UUID case" section — we've been burned by this more
+  // than once.
+  const userIdLc = String(account.userId).toLowerCase();
+  const agentProfileIdLc = String(account.agentProfileId).toLowerCase();
+
   const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
   const res = await fetch(ingestUrl, {
     method: "POST",
@@ -56,8 +63,8 @@ export async function sendOnepilotText({ ctx, accounts, getAccessToken, log }) {
       Authorization: `Bearer ${jwt}`,
     },
     body: JSON.stringify({
-      userId: account.userId,
-      agentProfileId: account.agentProfileId,
+      userId: userIdLc,
+      agentProfileId: agentProfileIdLc,
       sessionKey,
       role: "assistant",
       content: [{ type: "text", text: ctx.text }],

@@ -144,8 +144,12 @@ export async function handleUserMessage(params) {
   // Deliver the reply back via the ingest endpoint.
   // Auth: user's own access token (reused from the refresh flow). The ingest
   // endpoint verifies the token belongs to the userId we claim in the body.
+  // UUIDs are lowercased to match the backend's canonical form — see
+  // CLAUDE.md "UUID case" section.
   try {
     const ingestJwt = await getAccessToken();
+    const userIdLc = String(account.userId).toLowerCase();
+    const agentProfileIdLc = String(account.agentProfileId).toLowerCase();
     const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
     const deliverRes = await fetch(ingestUrl, {
       method: "POST",
@@ -154,8 +158,8 @@ export async function handleUserMessage(params) {
         "Authorization": `Bearer ${ingestJwt}`,
       },
       body: JSON.stringify({
-        userId: account.userId,
-        agentProfileId: account.agentProfileId,
+        userId: userIdLc,
+        agentProfileId: agentProfileIdLc,
         sessionKey: userMessageRow.session_key ?? account.sessionKey,
         role: "assistant",
         content: [{ type: "text", text: reply }],
