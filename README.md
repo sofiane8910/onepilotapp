@@ -5,7 +5,8 @@
 ### Your phone is the remote. Your agents are the work.
 
 [![iOS](https://img.shields.io/badge/iOS-15%2B-black.svg?style=flat-square&logo=apple)](https://apps.apple.com/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![Plugins: MIT](https://img.shields.io/badge/plugins-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![App: closed-source](https://img.shields.io/badge/app-closed--source-lightgrey.svg?style=flat-square)](#license)
 [![Plugins](https://img.shields.io/badge/plugins-1%20live%20%C2%B7%202%20next-brightgreen.svg?style=flat-square)](#supported-frameworks)
 [![Stars](https://img.shields.io/github/stars/sofiane8910/onepilotapp?style=flat-square)](https://github.com/sofiane8910/onepilotapp/stargazers)
 
@@ -119,7 +120,10 @@ Read [VISION.md](./VISION.md) for the full story.
 
 ## License
 
-[MIT](./LICENSE) — use it, fork it, ship it.
+- **Plugin adapters in this repo** (everything under `plugins/`, plus `docs/` and the workflow) — [MIT](./LICENSE). Fork them, ship your own, embed them in whatever runtime you want.
+- **The Onepilot iOS app** — closed-source, proprietary. The app binary ships through the App Store; its source is not published.
+
+In other words: this repo is the **public adapter layer**. It lets any framework wire into Onepilot without touching the app's code. The app itself stays private.
 
 <br>
 

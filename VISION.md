@@ -101,11 +101,11 @@ It's not the adapters — adapters are easy. The moat is:
 
 ## How this repo fits in
 
-- `plugins/<framework>/<name>/` — the adapters themselves. Each one stands alone, ships on its own release cadence, gets consumed by the iOS app at runtime.
+- `plugins/<framework>/<name>/` — the adapters themselves. MIT-licensed. Each one stands alone, ships on its own release cadence, gets consumed by the Onepilot app at runtime.
 - `README.md` — the vitrine. Marketing landing page, plugin catalog, contributor entry point.
 - `docs/catalog.json` — machine-readable plugin index for the app and for anyone scripting against the pool.
 
-No app source in here. This repo is purely the plugin pool and the landing page. The iOS app lives on the App Store; its source lives elsewhere.
+**What's not in here:** the Onepilot app itself. The iOS binary ships via the App Store and is closed-source. This repo is deliberately the *only* public surface — it's how third parties integrate without ever touching app code. Clean seam, clean licensing: the app stays proprietary, the adapters stay open.
 
 <br>
 
