@@ -1,4 +1,4 @@
-// Minimal Supabase Realtime v2 (Phoenix protocol) client.
+// Minimal Phoenix-protocol sync-bus client.
 //
 // Uses our RawWebSocket (node:https upgrade) instead of the global
 // WebSocket, because Node's built-in WebSocket is broken when called from
@@ -30,10 +30,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
  * @property {(msg: string, err?: unknown) => void} [log]
  */
 
-// Supabase rotates the refresh_token on every use. We persist the rotated
-// value to disk so plugin restarts (VPS reboot, gateway crash) don't fall
-// back to the stale token baked in at deploy-time. Without this, a user's
-// plugin can wedge indefinitely after ~24h offline and require a re-deploy.
+// The backend rotates the refresh_token on every use. We persist the
+// rotated value to disk so plugin restarts (VPS reboot, gateway crash)
+// don't fall back to the stale token baked in at deploy-time. Without
+// this, a user's plugin can wedge indefinitely after ~24h offline and
+// require a re-deploy.
 async function persistRefreshToken(accountId, token) {
   const dir = path.join(__dirname, "..", "tokens");
   try {
@@ -122,9 +123,9 @@ export function startRealtimeSubscription(config) {
     tokenExpMs = Date.now() + (json.expires_in ?? 3600) * 1000 - 60_000; // refresh 1 min early
     config.onAccessToken?.(accessToken);
     if (json.refresh_token) {
-      // Supabase rotates refresh_tokens — the old one is invalidated by this
-      // call. Persist the new one to disk so plugin restarts after hours or
-      // days of downtime still have a valid token to start from.
+      // The backend rotates refresh_tokens — the old one is invalidated by
+      // this call. Persist the new one to disk so plugin restarts after
+      // hours or days of downtime still have a valid token to start from.
       config.userRefreshToken = json.refresh_token;
       try {
         await persistRefreshToken(config.accountId, json.refresh_token);
@@ -144,9 +145,9 @@ export function startRealtimeSubscription(config) {
 
   // Proactively refresh the JWT before the server expires it and push the new
   // token to the live channel via `access_token`. Without this, the socket
-  // stays open past expiry and Realtime starts rejecting our events with
-  // `system error: Token has expired 0 seconds ago` — messages inserted into
-  // Supabase after that silently never reach us.
+  // stays open past expiry and the sync bus starts rejecting our events with
+  // `system error: Token has expired 0 seconds ago` — new messages after
+  // that point silently never reach us.
   function scheduleTokenRefresh() {
     if (tokenRefreshTimer) clearTimeout(tokenRefreshTimer);
     const msUntilRefresh = Math.max(30_000, tokenExpMs - Date.now() - 30_000);

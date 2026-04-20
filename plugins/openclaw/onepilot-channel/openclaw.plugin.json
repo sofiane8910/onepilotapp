@@ -1,7 +1,7 @@
 {
   "id": "onepilot",
   "name": "Onepilot",
-  "description": "Bridges Onepilot iOS messages to OpenClaw agents via Supabase Realtime. Survives iOS force-quits and background termination by running the agent loop server-side.",
+  "description": "Bridges Onepilot messages to OpenClaw agents. Survives mobile force-quits and background termination by running the agent loop server-side.",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,

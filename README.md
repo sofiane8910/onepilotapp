@@ -4,7 +4,7 @@
 
 ### Your phone is the remote. Your agents are the work.
 
-[![iOS](https://img.shields.io/badge/iOS-15%2B-black.svg?style=flat-square&logo=apple)](https://apps.apple.com/)
+[![iOS](https://img.shields.io/badge/iOS-15%2B-black.svg?style=flat-square&logo=apple)](https://onepilotapp.com)
 [![Plugins: MIT](https://img.shields.io/badge/plugins-MIT-blue.svg?style=flat-square)](./LICENSE)
 [![App: closed-source](https://img.shields.io/badge/app-closed--source-lightgrey.svg?style=flat-square)](#license)
 [![Plugins](https://img.shields.io/badge/plugins-1%20live%20%C2%B7%202%20next-brightgreen.svg?style=flat-square)](#supported-frameworks)
@@ -78,7 +78,7 @@ Want another framework? [Open an issue](https://github.com/sofiane8910/onepilota
 
 ## Install Onepilot
 
-**iOS app:** [App Store link](https://apps.apple.com/) *(badge)*
+Visit **[onepilotapp.com](https://onepilotapp.com)** for download and setup.
 
 Once the app is installed, it picks up plugins from this repo automatically — no manual tarball downloads, no terminal commands. Pair your agent, and the right plugin gets fetched in the background.
 
@@ -104,7 +104,6 @@ The CI workflow picks up the tag, packs the right subdirectory, and uploads the 
 
 - **Framework author?** Let's integrate. Open an issue titled `integration: <framework>` and we'll scope a plugin.
 - **User?** Star the repo 🌟, report bugs, ask for features.
-- **Security?** See [SECURITY.md](./SECURITY.md) *(coming soon)* — responsible disclosure, please.
 
 <br>
 

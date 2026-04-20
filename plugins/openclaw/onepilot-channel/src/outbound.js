@@ -6,8 +6,8 @@
 // `onepilot` channel, cron jobs fail at fire-time with "channel is required".
 //
 // We reuse the same delivery pipe the assistant-reply path uses
-// (messaging.js): POST to the openclaw-message-ingest edge function, which
-// writes the message into Supabase and triggers push-notify → APNs.
+// (messaging.js): POST to the ingest endpoint, which persists the message
+// and triggers the push notification.
 
 import { WEBHOOK_AUTH_KEY } from "./constants.js";
 

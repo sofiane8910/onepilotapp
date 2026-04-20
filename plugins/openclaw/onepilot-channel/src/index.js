@@ -1,19 +1,18 @@
 // Onepilot plugin for OpenClaw.
 //
-// Bridges iOS app user messages (stored in Supabase) to OpenClaw's agent
-// runtime, and writes agent replies back to Supabase so the iOS client can
-// receive them via Realtime + APNs push.
+// Bridges Onepilot app messages to OpenClaw's agent runtime and writes
+// agent replies back so the app can receive them via push notification.
 //
 // Architecture:
-//   1. iOS writes user row to Supabase.
-//   2. This plugin (running inside the gateway process) receives the INSERT
-//      via Supabase Realtime.
+//   1. App writes user row through the sync bus.
+//   2. This plugin (running inside the gateway process) receives the new
+//      message event.
 //   3. Plugin calls http://127.0.0.1:<gatewayPort>/v1/chat/completions locally.
 //      The caller is the gateway itself, so there's no external client that can
-//      disconnect — the LLM call always runs to completion, regardless of
-//      iOS's lifecycle (this is why force-quit works).
-//   4. Plugin POSTs the reply to the openclaw-message-ingest edge function.
-//   5. Supabase DB trigger fires push-notify → APNs.
+//      disconnect — the LLM call always runs to completion, regardless of the
+//      app's lifecycle (this is why force-quit works).
+//   4. Plugin posts the reply to the ingest endpoint.
+//   5. A backend trigger fires the push notification to the app.
 
 import { definePluginEntry } from "openclaw/plugin-sdk/core";
 import { startRealtimeSubscription } from "./realtime.js";
@@ -35,7 +34,7 @@ let _channelRegistered = false;
 export default definePluginEntry({
   id: "onepilot",
   name: "Onepilot",
-  description: "Bridges Onepilot iOS messages to OpenClaw agents via Supabase Realtime.",
+  description: "Bridges Onepilot messages to OpenClaw agents.",
   // register MUST be synchronous; our async work is fire-and-forget.
   register(api) {
     const pluginConfig = api.pluginConfig ?? {};
@@ -73,7 +72,7 @@ export default definePluginEntry({
     // (and any other outbound delivery path) can dispatch to it. Without
     // this, cron jobs fail at fire-time with "channel is required" because
     // the channel resolver can't find an `onepilot` entry in the registry.
-    // Inbound stays on the Realtime subscription below — the channel is
+    // Inbound stays on the sync subscription below — the channel is
     // outbound-only.
     if (!_channelRegistered && typeof api.registerChannel === "function") {
       try {
@@ -95,7 +94,7 @@ export default definePluginEntry({
             meta: {
               id: "onepilot",
               label: "Onepilot",
-              description: "Delivers to the Onepilot iOS app via Supabase.",
+              description: "Delivers to the Onepilot app.",
             },
             config: {
               listAccountIds: (cfg) => Object.keys(readAccounts(cfg)),

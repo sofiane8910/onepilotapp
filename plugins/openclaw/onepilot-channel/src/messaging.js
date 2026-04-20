@@ -1,14 +1,14 @@
-// Outbound dispatch: take a user message row from Supabase, run the agent
-// via the gateway's OpenAI-compatible endpoint, write the reply back to
-// Supabase via the `openclaw-message-ingest` edge function.
+// Outbound dispatch: take a user message event, run the agent via the
+// gateway's OpenAI-compatible endpoint, post the reply back through the
+// ingest endpoint.
 //
 // Why self-fetch to the gateway instead of OpenClaw's native channel dispatch:
 //   - zero SDK coupling (no channel registration, no `createChatChannelPlugin` scaffolding)
 //   - fetch caller lives inside the gateway process → no external client to
 //     disconnect → the LLM call always runs to completion, regardless of
-//     iOS lifecycle (force-quit survives)
-//   - we already have the persistence path wired (openclaw-message-ingest
-//     edge function + DB trigger → push-notify). No new code on the Supabase side.
+//     mobile-app lifecycle (force-quit survives)
+//   - we already have the persistence path wired (ingest endpoint → push
+//     trigger). No new backend code.
 
 import { WEBHOOK_AUTH_KEY } from "./constants.js";
 import { getAgentId } from "./env.js";
@@ -60,7 +60,7 @@ export async function handleUserMessage(params) {
     log(`already-answered probe failed (continuing): ${String(err)}`);
   }
 
-  // Build message history from Supabase.
+  // Build message history.
   let messages;
   try {
     messages = await loadHistory(account, sessionId, await getAccessToken());
@@ -142,7 +142,7 @@ export async function handleUserMessage(params) {
     return;
   }
 
-  // Deliver the reply back to Supabase via the existing ingest edge function.
+  // Deliver the reply back via the ingest endpoint.
   try {
     const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
     const deliverRes = await fetch(ingestUrl, {
@@ -187,7 +187,7 @@ async function loadHistory(account, sessionId, jwt) {
 }
 
 function extractText(content) {
-  // Supabase stores content as jsonb; can be string, nested JSON string, or array.
+  // Stored content can be a string, a nested JSON string, or an array.
   if (content == null) return "";
   if (typeof content === "string") {
     // Maybe JSON-encoded
