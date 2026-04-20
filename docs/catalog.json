@@ -1,0 +1,40 @@
+{
+  "$schema": "./catalog.schema.json",
+  "description": "Machine-readable index of Onepilot plugins. Consumed by the iOS app and by anyone scripting against the plugin pool.",
+  "updated_at": "2026-04-20",
+  "plugins": [
+    {
+      "framework": "openclaw",
+      "name": "onepilot-channel",
+      "status": "live",
+      "version": "v0.2.10",
+      "path": "plugins/openclaw/onepilot-channel",
+      "tag_prefix": "openclaw/onepilot-channel@",
+      "description": "Bridges OpenClaw agents to Onepilot — chat, cron, multi-agent, push alerts.",
+      "framework_url": "https://github.com/openclaw/openclaw",
+      "license": "MIT"
+    },
+    {
+      "framework": "hermes",
+      "name": "onepilot-channel",
+      "status": "planned",
+      "version": null,
+      "path": "plugins/hermes",
+      "tag_prefix": "hermes/onepilot-channel@",
+      "description": "Planned: Hermes Agent channel for Onepilot — persistent-memory chat, proactive alerts.",
+      "framework_url": "https://hermes-agent.nousresearch.com/",
+      "license": "MIT"
+    },
+    {
+      "framework": "paperclip",
+      "name": "onepilot-dashboard",
+      "status": "planned",
+      "version": null,
+      "path": "plugins/paperclip",
+      "tag_prefix": "paperclip/onepilot-dashboard@",
+      "description": "Planned: Paperclip company dashboard for Onepilot — live agent status, budgets, approvals.",
+      "framework_url": "https://github.com/paperclipai/paperclip",
+      "license": "MIT"
+    }
+  ]
+}

@@ -1,9 +1,16 @@
 name: Release plugin tarball
 
+# Triggered by tags of the form:
+#     <framework>/<plugin>@v<semver>
+# e.g. openclaw/onepilot-channel@v0.2.11
+#
+# The workflow parses the tag, packs the matching plugins/<framework>/<plugin>
+# subdirectory, and uploads the tarball as the release asset for that tag.
+
 on:
   push:
     tags:
-      - "v*"
+      - "*/*@v*"
 
 permissions:
   contents: write
@@ -14,44 +21,60 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set version
-        id: ver
+      - name: Parse tag
+        id: parse
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          # <framework>/<plugin>@vX.Y.Z
+          FRAMEWORK="${TAG%%/*}"
+          REST="${TAG#*/}"
+          PLUGIN="${REST%@*}"
+          VERSION="${REST#*@}"
+          DIR="plugins/${FRAMEWORK}/${PLUGIN}"
+          if [ ! -d "$DIR" ]; then
+            echo "::error::tag references $DIR but directory does not exist"
+            exit 1
+          fi
+          if [ ! -f "$DIR/package.json" ]; then
+            echo "::error::$DIR has no package.json — cannot pack"
+            exit 1
+          fi
+          echo "tag=$TAG"               >> "$GITHUB_OUTPUT"
+          echo "framework=$FRAMEWORK"   >> "$GITHUB_OUTPUT"
+          echo "plugin=$PLUGIN"         >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"       >> "$GITHUB_OUTPUT"
+          echo "dir=$DIR"               >> "$GITHUB_OUTPUT"
 
       - name: Pack plugin
         id: pack
+        working-directory: ${{ steps.parse.outputs.dir }}
         run: |
-          TAG="${{ steps.ver.outputs.tag }}"
-          # npm pack respects `files` in package.json — produces a npm-style
-          # tarball with package/ as top-level. Good for tar --strip-components=1.
           npm pack --silent
-          # Rename to a predictable filename the client can template.
-          ORIG=$(ls openclaw-onepilot-channel-*.tgz | head -1)
-          OUT="onepilot-channel-${TAG}.tgz"
+          ORIG=$(ls *.tgz | head -1)
+          OUT="${{ steps.parse.outputs.plugin }}-${{ steps.parse.outputs.version }}.tgz"
           mv "$ORIG" "$OUT"
           SHA=$(sha256sum "$OUT" | awk '{print $1}')
-          echo "tarball=$OUT" >> "$GITHUB_OUTPUT"
-          echo "sha256=$SHA" >> "$GITHUB_OUTPUT"
+          echo "tarball=$OUT"             >> "$GITHUB_OUTPUT"
+          echo "path=$PWD/$OUT"           >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA"              >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.ver.outputs.tag }}
-          name: ${{ steps.ver.outputs.tag }}
+          tag_name: ${{ steps.parse.outputs.tag }}
+          name: "${{ steps.parse.outputs.framework }}/${{ steps.parse.outputs.plugin }} ${{ steps.parse.outputs.version }}"
           body: |
-            Plugin tarball for Onepilot iOS + OpenClaw channel bridge.
+            **${{ steps.parse.outputs.framework }} · ${{ steps.parse.outputs.plugin }} · ${{ steps.parse.outputs.version }}**
+
+            Built from `${{ steps.parse.outputs.dir }}`.
 
             ## Integrity
-
             ```
             sha256: ${{ steps.pack.outputs.sha256 }}
             ```
 
-            ## Install
-
-            Users don't install this manually. The Onepilot app picks up new
-            releases via its `plugin_manifest` backend row — push a fix,
-            bump the manifest, agents update on next start.
-          files: ${{ steps.pack.outputs.tarball }}
+            ## How to install
+            Users don't install plugins manually. The Onepilot app resolves
+            the right tarball at runtime — bump the backend manifest and
+            agents pull on next start.
+          files: ${{ steps.pack.outputs.path }}

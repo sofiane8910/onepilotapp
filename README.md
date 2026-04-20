@@ -1,130 +1,128 @@
-# openclaw-onepilot-channel
+<div align="center">
 
-OpenClaw plugin that bridges the Onepilot iOS app to the agent runtime. Two responsibilities, both running inside the OpenClaw gateway process on the agent host:
+# Onepilot — AI agents, in your pocket
 
-1. **Inbound** — listens to Supabase Realtime for new user-message rows, dispatches them into the agent loop via the gateway's local `/v1/chat/completions` endpoint, and POSTs the assistant reply to the `openclaw-message-ingest` edge function so iOS receives it through Realtime + APNs push. Survives iOS force-quits because the agent loop never depends on the iOS side staying alive.
-2. **Outbound channel** — registers `onepilot` as a real OpenClaw channel (`api.registerChannel`). This is what makes cron jobs (and any other agent-driven outbound delivery) work — without a registered channel, OpenClaw's delivery resolver throws `"channel is required"` at fire-time. The channel's `sendText` reuses the same Supabase ingest path the inbound reply flow uses.
+### Your phone is the remote. Your agents are the work.
 
-## Repository layout
+[![iOS](https://img.shields.io/badge/iOS-15%2B-black.svg?style=flat-square&logo=apple)](https://apps.apple.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![Plugins](https://img.shields.io/badge/plugins-1%20live%20%C2%B7%202%20next-brightgreen.svg?style=flat-square)](#supported-frameworks)
+[![Stars](https://img.shields.io/github/stars/sofiane8910/onepilotapp?style=flat-square)](https://github.com/sofiane8910/onepilotapp/stargazers)
 
+</div>
+
+---
+
+Onepilot is the mobile companion for the AI agents you already run. Cron jobs, chat, deploys, monitoring — all the things your agent does all day, now with a real UI you can open on the bus.
+
+This repo is **the public plugin pool**. Every agent framework we integrate with ships its adapter here, so a user on iPhone can flip from a cron on their OpenClaw agent, to a status board on their Paperclip company, to a persistent-memory chat on Hermes — one app, one surface.
+
+> **Drop-in integration.** If you run an agent framework, you get a free iOS front-end. No SDK to learn, no UI to build.
+
+<br>
+
+## What Onepilot looks like
+
+```mermaid
+graph LR
+    U[👤 You] --> A[📱 Onepilot]
+    A <--> B((🔄 Sync))
+    B <--> P1[🤖 OpenClaw]
+    B <-.-> P2[🧠 Hermes]
+    B <-.-> P3[🧷 Paperclip]
+
+    style A fill:#111,stroke:#fff,color:#fff
+    style B fill:#222,stroke:#888,color:#fff
+    style P1 fill:#1e3a2e,stroke:#3ddc84,color:#fff
+    style P2 fill:#2a2a2a,stroke:#888,color:#aaa
+    style P3 fill:#2a2a2a,stroke:#888,color:#aaa
 ```
-openclaw-onepilot-channel/
-├── README.md            ← you are here
-├── TESTING.md           ← end-to-end test sheet (foreground, force-quit, push, etc.)
-├── package.json         ← npm metadata; `version` is the source of truth for releases
-├── openclaw.plugin.json ← plugin manifest read by OpenClaw at install time
-└── src/
-    ├── index.js         ← register() hook: wires Realtime + registers `onepilot` channel
-    ├── realtime.js      ← Supabase Realtime client over our raw WS (see ws-raw.js)
-    ├── messaging.js     ← inbound dispatch: user row → agent loop → reply ingest
-    ├── outbound.js      ← outbound channel handler: cron / agent reply → ingest
-    ├── constants.js     ← shared WEBHOOK_AUTH_KEY (mirrors OpenClawAdapter.swift)
-    └── ws-raw.js        ← node:https-based WebSocket (built-in WebSocket is broken
-                            inside the gateway process — see file header)
+
+*Solid line = live. Dashed = next release.*
+
+<br>
+
+## What you can do with it
+
+```mermaid
+graph TB
+    A[📱 Onepilot on your phone]
+    A --> C1[💬 Chat with agents]
+    A --> C2[⏰ Schedule cron jobs]
+    A --> C3[🔔 Get push when work finishes]
+    A --> C4[🖥️ Open a live terminal]
+    A --> C5[📊 Watch agent teams run your ops]
+
+    style A fill:#111,stroke:#fff,color:#fff
+    style C1 fill:#1a1a1a,stroke:#555,color:#ddd
+    style C2 fill:#1a1a1a,stroke:#555,color:#ddd
+    style C3 fill:#1a1a1a,stroke:#555,color:#ddd
+    style C4 fill:#1a1a1a,stroke:#555,color:#ddd
+    style C5 fill:#1a1a1a,stroke:#555,color:#ddd
 ```
 
-## Distribution flow (how iOS installs this plugin)
+<br>
 
-We **do not** embed plugin source in the iOS binary. Plugin updates ship independently of App Store review.
+## Supported frameworks
 
-```
-┌────────────────────────┐      ┌──────────────────────┐      ┌─────────────────────┐
-│  GitHub Release        │      │  Supabase            │      │  iOS app            │
-│  sofiane8910/          │◀─────│  public.             │─────▶│  PluginManifest     │
-│  onepilotapp/releases  │      │  plugin_manifest     │      │  Fetcher.fetch()    │
-│  v0.X.Y/               │      │  (channel='stable')  │      │                     │
-│  onepilot-channel-     │      │  → version           │      │  ssh-installs over  │
-│  v0.X.Y.tgz            │      │  → tarball_url       │      │  curl + sha256      │
-└────────────────────────┘      │  → sha256            │      │  + tar -xzf         │
-                                └──────────────────────┘      └─────────────────────┘
-```
+| Framework | Plugin | Status | What it adds to Onepilot |
+|---|---|---|---|
+| [**OpenClaw**](https://github.com/openclaw/openclaw) | [`openclaw/onepilot-channel`](./plugins/openclaw/onepilot-channel) | ✅ **Live** | Chat, cron, multi-agent, push alerts |
+| [**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | 🚧 Next | Persistent-memory chat, multi-channel gateway mirror |
+| [**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
 
-1. We tag a release on `sofiane8910/onepilotapp` and attach the tgz tarball.
-2. We `UPDATE` the row in Supabase `public.plugin_manifest` to point `tarball_url` and `sha256` at the new release.
-3. On the next agent deploy, iOS reads the manifest, SSH-runs an install script on the agent host that `curl`s the tarball, verifies the sha256 inline (mismatch → abort, no files written), and `tar -xzf` into `~/.openclaw-<agentId>/plugins/openclaw-onepilot-channel/`, then runs `openclaw plugins install <dir> --link`.
-4. The Supabase row is the version pin — bump it whenever you want a new build to roll out.
+Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new) or jump into [VISION.md](./VISION.md) for the roadmap.
 
-iOS reads the manifest in `ios/Sources/Onepilot/Models/Agent/Adapters/PluginManifestFetcher.swift`. The install flow lives in `OpenClawAdapter.swift` (`deployOnepilotChannelPlugin` → `installPluginFromRelease` → `buildUnixInstallScript` / `buildWindowsInstallScript`).
+<br>
 
-## Cutting a new version
+## Install Onepilot
+
+**iOS app:** [App Store link](https://apps.apple.com/) *(badge)*
+
+Once the app is installed, it picks up plugins from this repo automatically — no manual tarball downloads, no terminal commands. Pair your agent, and the right plugin gets fetched in the background.
+
+<br>
+
+## Write a plugin
+
+Each plugin lives under `plugins/<framework>/<name>/`. The README inside each folder is the integration guide for that specific framework.
+
+Release flow is git-tag driven:
 
 ```sh
-# 1. Bump the version in package.json
-#    Use semver. Patch for bugfix, minor for additive changes, major for breaking.
-
-# 2. Pack
-cd openclaw-onepilot-channel
-VERSION=$(node -p "require('./package.json').version")
-npm pack                                              # → openclaw-onepilot-channel-<VERSION>.tgz
-mv openclaw-onepilot-channel-${VERSION}.tgz onepilot-channel-v${VERSION}.tgz
-
-# 3. Compute sha256
-SHA=$(shasum -a 256 onepilot-channel-v${VERSION}.tgz | awk '{print $1}')
-echo "sha256=$SHA"
-
-# 4. Cut the GitHub release
-gh release create v${VERSION} \
-  onepilot-channel-v${VERSION}.tgz \
-  --repo sofiane8910/onepilotapp \
-  --title "openclaw-onepilot-channel v${VERSION}" \
-  --notes "See https://github.com/sofiane8910/terminal_agent for changelog."
-
-# 5. Roll it out: UPDATE the Supabase manifest row
-#    Use the supabase_onepilot MCP (project id eyfayueqafznhppbufub):
-#    UPDATE public.plugin_manifest
-#       SET version='${VERSION}',
-#           tarball_url='https://github.com/sofiane8910/onepilotapp/releases/download/v${VERSION}/onepilot-channel-v${VERSION}.tgz',
-#           sha256='${SHA}',
-#           updated_at=now()
-#     WHERE channel='stable';
+# from main, after your plugin is ready to ship
+git tag <framework>/<plugin>@v1.2.3
+git push origin <framework>/<plugin>@v1.2.3
 ```
 
-After step 5, every agent picks up the new plugin on its next deploy (or on next gateway restart if you trigger a redeploy from the iOS Debug section).
+The CI workflow picks up the tag, packs the right subdirectory, and uploads the tarball as a GitHub release asset. Done.
 
-## Configuring an account
+<br>
 
-Provisioned automatically by the iOS deploy flow. Manual form:
+## Why Onepilot exists
 
-```sh
-openclaw --profile <agent-id> config set 'plugins.entries.onepilot.config.accounts.default' '{
-  "enabled": true,
-  "supabaseUrl": "https://<project>.supabase.co",
-  "supabaseAnonKey": "<anon key>",
-  "userId": "<uuid>",
-  "agentProfileId": "<uuid>",
-  "sessionKey": "main",
-  "pluginJwt": "<long-lived JWT minted by mint-plugin-jwt edge function>"
-}'
-```
+Every agent framework today assumes you live in a terminal. You don't. You live on your phone, in meetings, walking around. Agents run 24/7 — they should be reachable the same way your team is.
 
-`pluginJwt` is preferred over `userRefreshToken` (avoids the shared-session refresh-token rotation race). iOS mints it at deploy time.
+Onepilot is one app that speaks every framework. The more frameworks we support, the less lock-in for anyone building agents.
 
-## Why outbound goes through the same Supabase ingest endpoint
+Read [VISION.md](./VISION.md) for the full story.
 
-Both inbound replies (`messaging.js`) and outbound channel sends (`outbound.js`) POST to the `openclaw-message-ingest` edge function with the shared `WEBHOOK_AUTH_KEY`. That function writes the row to `public.messages`, which fires the push-notify trigger → APNs. By reusing the pipe:
+<br>
 
-- **One write path** to Supabase, one push pipeline, one place to debug.
-- **No client coupling** — the agent host doesn't need iOS-specific SDK code; it just needs `fetch` and the shared secret.
-- **Cron delivery works the same as a normal reply** — an iOS user can't tell whether a message was scheduled or freshly generated.
+## Contributing
 
-## Rollback
+- **Framework author?** Let's integrate. Open an issue titled `integration: <framework>` and we'll scope a plugin.
+- **User?** Star the repo 🌟, report bugs, ask for features.
+- **Security?** See [SECURITY.md](./SECURITY.md) *(coming soon)* — responsible disclosure, please.
 
-If a release misbehaves, revert the manifest row to a known-good version and (optionally) yank the bad release:
+<br>
 
-```sql
-UPDATE public.plugin_manifest
-   SET version='<previous>',
-       tarball_url='https://github.com/sofiane8910/onepilotapp/releases/download/v<previous>/onepilot-channel-v<previous>.tgz',
-       sha256='<previous sha>',
-       updated_at=now()
- WHERE channel='stable';
-```
+## License
 
-Existing agents won't downgrade automatically (the install script is a no-op when the installed version matches the manifest), but new deploys and reinstalls will pick up the rollback. To force a redowngrade, run "Reinstall plugin" from the iOS Debug → self-heal section.
+[MIT](./LICENSE) — use it, fork it, ship it.
 
-## See also
+<br>
 
-- `TESTING.md` — end-to-end test plan (foreground chat, force-quit, push dedup, refresh-token rotation, multi-host).
-- `/openclaw/` (in this monorepo) — upstream OpenClaw source. **Do not modify.**
-- `ios/Sources/Onepilot/Models/Agent/Adapters/OpenClawAdapter.swift` — the iOS deploy/install code.
-- `ios/Sources/Onepilot/Models/Agent/Adapters/PluginManifestFetcher.swift` — Supabase manifest reader.
+<div align="center">
+<sub><b>Onepilot</b> · agents on your phone · <a href="https://github.com/sofiane8910/onepilotapp/stargazers">star this repo ⭐</a> if you want more frameworks supported</sub>
+</div>
