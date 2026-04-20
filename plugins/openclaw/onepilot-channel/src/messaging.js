@@ -178,7 +178,12 @@ export async function handleUserMessage(params) {
 }
 
 async function loadHistory(account, sessionId, jwt) {
-  const url = `${account.supabaseUrl}/rest/v1/messages?select=role,content&session_id=eq.${sessionId}&order=created_at.asc&limit=${HISTORY_LIMIT}`;
+  // Fetch the MOST RECENT messages, then reverse to chronological order.
+  // Previously this used order=asc which returned the first 20 messages ever
+  // written to the session — so after a session accumulated >20 messages,
+  // every new turn saw only ancient history and never the user's current
+  // request. The LLM kept re-answering old prompts.
+  const url = `${account.supabaseUrl}/rest/v1/messages?select=role,content,created_at&session_id=eq.${sessionId}&order=created_at.desc&limit=${HISTORY_LIMIT}`;
   const res = await fetch(url, {
     headers: { apikey: account.supabaseAnonKey, Authorization: `Bearer ${jwt}` },
   });
@@ -188,6 +193,8 @@ async function loadHistory(account, sessionId, jwt) {
   }
   const rows = await res.json();
   return rows
+    .slice()
+    .reverse()
     .map((row) => ({ role: row.role, content: extractText(row.content) }))
     .filter((m) => m.content);
 }
