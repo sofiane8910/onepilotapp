@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="docs/img/pillars.svg" alt="Onepilot — modern mobile terminal + AI agent ops" width="100%"/>
-
 # Onepilot
 
 ### The mobile terminal for modern developers — with an AI agent layer built in.
@@ -32,9 +30,87 @@ You get a real SSH terminal — and around it, the rest of the modern dev workfl
 
 <br>
 
-## What's in the app
+## What Onepilot is
 
-<img src="docs/img/feature-grid.svg" alt="Onepilot features" width="100%"/>
+```mermaid
+flowchart LR
+    P([📱 Onepilot])
+    subgraph T1[" "]
+      direction TB
+      L1["⌨ Terminal"]
+      L2["📝 Live file edit"]
+      L3["🌐 localhost preview"]
+      L4["🐙 GitHub PRs"]
+    end
+    subgraph T2[" "]
+      direction TB
+      R1["⚡ Deploy agents"]
+      R2["💬 Chat from your phone"]
+      R3["⏱ Cron jobs"]
+      R4["🔔 Push when done"]
+    end
+    T1 --- P --- T2
+    classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
+    classDef left fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a
+    classDef right fill:#eff6ff,stroke:#0070f3,color:#0a0a0a
+    class P root
+    class L1,L2,L3,L4 left
+    class R1,R2,R3,R4 right
+    style T1 fill:none,stroke:none
+    style T2 fill:none,stroke:none
+```
+
+**Pillar 1** — modern mobile terminal + dev ecosystem. **Pillar 2** — AI agent ops on your phone.
+
+<br>
+
+## How agents work
+
+```mermaid
+flowchart LR
+    A["📱 Onepilot"] -- "chat / cron" --> B[("🔄 Realtime sync")]
+    B -- "encrypted" --> C["🖥 Your server"]
+    C --> D["🤖 OpenClaw runtime"]
+    D -- "results" --> B
+    B -- "🔔 push" --> A
+```
+
+Spin up an agent on your own server with a guided wizard. No YAML to edit, no Telegram bot to babysit. Talk to it directly from the app.
+
+<br>
+
+## See it
+
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <a href="https://onepilotapp.com"><img src="docs/img/hero.webp" alt="Home dashboard" width="100%"/></a>
+      <br><sub><b>Home</b> · servers + agents at a glance</sub>
+    </td>
+    <td width="33%" align="center">
+      <a href="https://onepilotapp.com"><img src="docs/img/terminal.webp" alt="Live SSH terminal" width="100%"/></a>
+      <br><sub><b>Terminal</b> · real SSH, real PTY</sub>
+    </td>
+    <td width="33%" align="center">
+      <a href="https://onepilotapp.com"><img src="docs/img/agents.webp" alt="Agent chat" width="100%"/></a>
+      <br><sub><b>Agents</b> · chat with your fleet</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <a href="https://onepilotapp.com"><img src="docs/img/servers.webp" alt="Servers list" width="100%"/></a>
+      <br><sub><b>Servers</b> · pair, monitor, jump</sub>
+    </td>
+    <td align="center">
+      <a href="https://onepilotapp.com"><img src="docs/img/deploy.webp" alt="Agent deploy wizard" width="100%"/></a>
+      <br><sub><b>Deploy</b> · agent in &lt; 60s</sub>
+    </td>
+    <td align="center">
+      <a href="https://onepilotapp.com"><img src="docs/img/control.webp" alt="Cron + control panel" width="100%"/></a>
+      <br><sub><b>Control</b> · cron, run-now, logs</sub>
+    </td>
+  </tr>
+</table>
 
 <br>
 
@@ -44,15 +120,19 @@ Mobile SSH apps have been frozen in 2014. They give you a prompt and call it don
 
 The agent layer comes from the same observation: running an AI agent on your server today means SSH'ing in to edit YAML, then setting up a Telegram bot to talk to it. Onepilot collapses that to a guided wizard and an in-app chat.
 
-> **We did not build [OpenClaw](https://github.com/openclaw/openclaw).** OpenClaw is a third-party open-source agent runtime. Onepilot integrates with it and adds the orchestration layer that's missing — deployment, monitoring, mobile chat, push.
-
 <br>
 
 ## The repo: framework adapter pool
 
-<img src="docs/img/frameworks.svg" alt="Framework adapter layer" width="100%"/>
+```mermaid
+flowchart LR
+    A["📱 Onepilot app"] -- pair server --> B["📦 plugins/&lt;framework&gt;/"]
+    B --> C["🤖 OpenClaw"]
+    B -.-> D["🧠 Hermes (next)"]
+    B -.-> E["🧷 Paperclip (next)"]
+```
 
-This repo is the **public plugin pool** that powers Onepilot's agent pillar. Every agent framework we integrate with ships its adapter here. When you pair a server in the app, the right adapter is fetched automatically.
+This repo is the **public plugin pool** that powers Onepilot's agent pillar. Every framework we integrate with ships its adapter here. When you pair a server in the app, the right adapter is fetched automatically.
 
 > **Drop-in integration.** If you run an agent framework, you get a free iOS front-end. No SDK to learn, no UI to build.
 
@@ -72,25 +152,9 @@ Want another framework? [Open an issue](https://github.com/sofiane8910/onepilota
 
 ## Install Onepilot
 
-<table>
-<tr>
-<td width="60%" valign="top">
-
 The plugin pool is automatic. Pair an agent in the app and the right adapter loads in the background — no tarballs, no terminal commands.
 
-**Free tier:** 1 server, 1 agent, the full terminal ecosystem, file editing, browser, GitHub.
-**Pro:** unlimited servers, unlimited agents, file creation, advanced sync.
-
-We never ship behind a paywall — the free tier is the real product.
-
 ### [→ Download at onepilotapp.com](https://onepilotapp.com)
-
-</td>
-<td width="40%" align="center">
-<img src="docs/img/hero.webp" alt="Onepilot home" width="240"/>
-</td>
-</tr>
-</table>
 
 <br>
 
@@ -121,8 +185,6 @@ CI picks up the tag, packs the right subdirectory, and uploads the tarball as a 
 
 - **Plugin adapters in this repo** (everything under `plugins/`, plus `docs/` and the workflow) — [MIT](./LICENSE). Fork them, ship your own, embed them in whatever runtime you want.
 - **The Onepilot iOS app** — closed-source, proprietary. The binary ships through the App Store; its source is not published.
-
-This repo is the **public adapter layer** — it lets any framework wire into Onepilot without touching the app's code. The app itself stays private.
 
 <br>
 
