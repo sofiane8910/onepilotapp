@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 540" width="1400" height="540" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+  <defs>
+    <pattern id="g2" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1400" height="540" fill="#0a0a0a"/>
+  <rect width="1400" height="540" fill="url(#g2)"/>
+
+  <text x="60" y="60" fill="#666" font-size="13" letter-spacing="2">WHAT'S IN THE APP · v1.2</text>
+  <line x1="60" y1="78" x2="1340" y2="78" stroke="#1f1f1f"/>
+
+  <!-- 8 cards in 4x2 grid -->
+  <g font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+    <!-- row 1 -->
+    <g transform="translate(60,110)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">01 / TERMINAL</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Real SSH.</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">Real PTY.</text>
+      <text x="24" y="132" fill="#888" font-size="12">VT100, mosh, port forward, SSH</text>
+      <text x="24" y="150" fill="#888" font-size="12">keys, jump hosts. Not a toy.</text>
+    </g>
+    <g transform="translate(380,110)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">02 / FILES</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Edit live on</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">the remote.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Open, edit, save without leaving</text>
+      <text x="24" y="150" fill="#888" font-size="12">your phone. Picker included.</text>
+    </g>
+    <g transform="translate(700,110)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">03 / BROWSER</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">localhost:3000</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">on mobile.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Forward a port, preview your dev</text>
+      <text x="24" y="150" fill="#888" font-size="12">server in the in-app browser.</text>
+    </g>
+    <g transform="translate(1020,110)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">04 / GITHUB</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">PRs, repos,</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">Actions.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Triage in line. No hopping out</text>
+      <text x="24" y="150" fill="#888" font-size="12">to a browser tab.</text>
+    </g>
+    <!-- row 2 -->
+    <g transform="translate(60,300)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">05 / AGENTS</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Deploy in</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">&lt; 60 seconds.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Guided wizard. No config files,</text>
+      <text x="24" y="150" fill="#888" font-size="12">no Telegram bot babysitting.</text>
+    </g>
+    <g transform="translate(380,300)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">06 / CHAT</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Direct chat,</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">no gateway.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Talk to your agent over</text>
+      <text x="24" y="150" fill="#888" font-size="12">Supabase Realtime, encrypted.</text>
+    </g>
+    <g transform="translate(700,300)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">07 / CRON</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Schedule,</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">run-now, watch.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Per-server agent crons. Push</text>
+      <text x="24" y="150" fill="#888" font-size="12">notification on completion.</text>
+    </g>
+    <g transform="translate(1020,300)">
+      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
+      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">08 / KEYS</text>
+      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Bring your</text>
+      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">own LLM.</text>
+      <text x="24" y="132" fill="#888" font-size="12">Claude, GPT, OSS. Free or</text>
+      <text x="24" y="150" fill="#888" font-size="12">paid — your key, your bill.</text>
+    </g>
+  </g>
+
+  <line x1="60" y1="498" x2="1340" y2="498" stroke="#1f1f1f"/>
+  <text x="60" y="524" fill="#666" font-size="12">terminal pillar</text>
+  <rect x="180" y="514" width="14" height="3" fill="#0cce6b"/>
+  <text x="240" y="524" fill="#666" font-size="12">agent pillar</text>
+  <rect x="345" y="514" width="14" height="3" fill="#0070f3"/>
+  <text x="1100" y="524" fill="#666" font-size="12">→ onepilotapp.com</text>
+</svg>

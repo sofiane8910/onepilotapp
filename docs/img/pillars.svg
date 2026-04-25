@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 620" width="1400" height="620" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+  <defs>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="green" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0cce6b"/>
+      <stop offset="1" stop-color="#0aa055"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1400" height="620" fill="#0a0a0a"/>
+  <rect width="1400" height="620" fill="url(#grid)"/>
+
+  <!-- title row -->
+  <text x="60" y="68" fill="#666" font-size="13" letter-spacing="2">ONEPILOT · TWO PILLARS · ONE PHONE</text>
+  <line x1="60" y1="86" x2="1340" y2="86" stroke="#1f1f1f"/>
+
+  <!-- LEFT PILLAR -->
+  <g transform="translate(60,120)">
+    <text x="0" y="0" fill="#0cce6b" font-size="13" letter-spacing="3">PILLAR 01</text>
+    <text x="0" y="36" fill="#fafafa" font-size="30" font-weight="600">Modern mobile terminal.</text>
+    <text x="0" y="66" fill="#888" font-size="14">SSH that doesn't end at the prompt.</text>
+
+    <g transform="translate(0,108)" font-size="13" fill="#cfcfcf">
+      <rect x="0" y="0" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="28">┌─ SSH · Mosh · port forwarding</text>
+      <rect x="0" y="52" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="80">├─ Live file editor on the remote box</text>
+      <rect x="0" y="104" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="132">├─ Localhost preview · in-app browser</text>
+      <rect x="0" y="156" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="184">├─ GitHub: PRs, repos, Actions</text>
+      <rect x="0" y="208" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="236">└─ Cron monitor + directory picker</text>
+    </g>
+  </g>
+
+  <!-- PHONE in middle -->
+  <g transform="translate(625,120)">
+    <rect x="0" y="0" width="150" height="300" rx="22" fill="#0f0f0f" stroke="#2a2a2a" stroke-width="2"/>
+    <rect x="10" y="10" width="130" height="280" rx="14" fill="#000"/>
+    <rect x="22" y="22" width="106" height="6" rx="3" fill="#1a1a1a"/>
+    <!-- pseudo screen content -->
+    <rect x="22" y="42" width="106" height="22" fill="#111"/>
+    <text x="28" y="58" fill="#0cce6b" font-size="9">$ onepilot</text>
+    <rect x="22" y="70" width="106" height="22" fill="#111"/>
+    <text x="28" y="86" fill="#888" font-size="9">→ vps · prod</text>
+    <rect x="22" y="98" width="106" height="22" fill="#111"/>
+    <text x="28" y="114" fill="#888" font-size="9">→ openclaw · ok</text>
+    <rect x="22" y="126" width="106" height="22" fill="#111"/>
+    <text x="28" y="142" fill="#888" font-size="9">→ cron · 03:00</text>
+    <rect x="22" y="154" width="106" height="22" fill="#111"/>
+    <text x="28" y="170" fill="#888" font-size="9">→ chat (12)</text>
+    <rect x="22" y="182" width="106" height="22" fill="#111"/>
+    <text x="28" y="198" fill="#888" font-size="9">→ logs · live</text>
+
+    <circle cx="75" cy="278" r="4" fill="#0cce6b"/>
+
+    <text x="75" y="332" fill="#666" font-size="11" text-anchor="middle">iPhone · iPad</text>
+  </g>
+
+  <!-- connectors L -->
+  <g stroke="#2a2a2a" fill="none" stroke-width="1.5">
+    <path d="M 500 220 L 625 220" stroke-dasharray="2 4"/>
+    <path d="M 500 280 L 625 280" stroke-dasharray="2 4"/>
+    <path d="M 775 220 L 900 220" stroke-dasharray="2 4"/>
+    <path d="M 775 280 L 900 280" stroke-dasharray="2 4"/>
+  </g>
+
+  <!-- RIGHT PILLAR -->
+  <g transform="translate(900,120)">
+    <text x="0" y="0" fill="#0070f3" font-size="13" letter-spacing="3">PILLAR 02</text>
+    <text x="0" y="36" fill="#fafafa" font-size="30" font-weight="600">AI agent ops layer.</text>
+    <text x="0" y="66" fill="#888" font-size="14">Spin up an agent from your phone in &lt; 60s.</text>
+
+    <g transform="translate(0,108)" font-size="13" fill="#cfcfcf">
+      <rect x="0" y="0" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="28">┌─ One-click deploy · guided wizard</text>
+      <rect x="0" y="52" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="80">├─ Chat without setting up Telegram</text>
+      <rect x="0" y="104" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="132">├─ Cron-scheduled agents · run-now</text>
+      <rect x="0" y="156" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="184">├─ Health checks · push when done</text>
+      <rect x="0" y="208" width="440" height="44" fill="#111" stroke="#1f1f1f"/>
+      <text x="16" y="236">└─ Bring any LLM key (Claude, GPT, OSS)</text>
+    </g>
+  </g>
+
+  <!-- footer note -->
+  <line x1="60" y1="540" x2="1340" y2="540" stroke="#1f1f1f"/>
+  <text x="60" y="572" fill="#666" font-size="12">runtime →</text>
+  <text x="130" y="572" fill="#cfcfcf" font-size="12">OpenClaw (third-party, MIT)</text>
+  <text x="430" y="572" fill="#666" font-size="12">we provide →</text>
+  <text x="525" y="572" fill="#cfcfcf" font-size="12">the orchestration layer + the phone</text>
+  <text x="930" y="572" fill="#666" font-size="12">free →</text>
+  <text x="990" y="572" fill="#0cce6b" font-size="12">1 server · 1 agent · everything else</text>
+</svg>

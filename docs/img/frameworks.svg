@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 460" width="1400" height="460" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+  <defs>
+    <pattern id="g3" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1400" height="460" fill="#0a0a0a"/>
+  <rect width="1400" height="460" fill="url(#g3)"/>
+
+  <text x="60" y="60" fill="#666" font-size="13" letter-spacing="2">FRAMEWORK ADAPTER LAYER · THIS REPO</text>
+  <line x1="60" y1="78" x2="1340" y2="78" stroke="#1f1f1f"/>
+
+  <!-- Onepilot app card (left) -->
+  <g transform="translate(60,120)">
+    <rect width="280" height="220" fill="#0f0f0f" stroke="#2a2a2a" stroke-width="1.5"/>
+    <text x="20" y="34" fill="#666" font-size="11" letter-spacing="2">ONE APP</text>
+    <text x="20" y="74" fill="#fafafa" font-size="22" font-weight="600">Onepilot iOS</text>
+    <text x="20" y="100" fill="#888" font-size="12">closed-source · App Store</text>
+
+    <line x1="20" y1="124" x2="260" y2="124" stroke="#1f1f1f"/>
+    <text x="20" y="150" fill="#cfcfcf" font-size="13">┌ pair a server</text>
+    <text x="20" y="172" fill="#cfcfcf" font-size="13">├ pick framework</text>
+    <text x="20" y="194" fill="#0cce6b" font-size="13">└ adapter loads · auto</text>
+  </g>
+
+  <!-- arrows -->
+  <g stroke="#2a2a2a" fill="none" stroke-width="1.5">
+    <path d="M 340 230 L 480 230" stroke-dasharray="2 4"/>
+    <polygon points="480,230 472,226 472,234" fill="#2a2a2a" stroke="none"/>
+  </g>
+
+  <!-- Adapter pool (middle) -->
+  <g transform="translate(490,120)">
+    <rect width="380" height="220" fill="#0f0f0f" stroke="#0cce6b" stroke-width="1.5"/>
+    <rect x="0" y="0" width="380" height="32" fill="#0cce6b"/>
+    <text x="20" y="22" fill="#0a0a0a" font-size="12" font-weight="700" letter-spacing="2">PUBLIC PLUGIN POOL · MIT</text>
+
+    <text x="20" y="64" fill="#fafafa" font-size="14">github.com/sofiane8910/onepilotapp</text>
+    <text x="20" y="86" fill="#666" font-size="12">git-tag → release · auto-fetched by app</text>
+
+    <g font-size="13" fill="#cfcfcf">
+      <rect x="20" y="106" width="340" height="30" fill="#111" stroke="#1f1f1f"/>
+      <text x="32" y="126">plugins/openclaw/onepilot-channel</text>
+      <rect x="20" y="142" width="340" height="30" fill="#111" stroke="#1f1f1f"/>
+      <text x="32" y="162">plugins/hermes/*</text>
+      <rect x="20" y="178" width="340" height="30" fill="#111" stroke="#1f1f1f"/>
+      <text x="32" y="198">plugins/paperclip/*</text>
+    </g>
+  </g>
+
+  <!-- arrows out -->
+  <g stroke="#2a2a2a" fill="none" stroke-width="1.5">
+    <path d="M 870 175 L 1010 145" stroke-dasharray="2 4"/>
+    <path d="M 870 230 L 1010 230" stroke-dasharray="2 4"/>
+    <path d="M 870 285 L 1010 315" stroke-dasharray="2 4"/>
+  </g>
+
+  <!-- Frameworks (right) -->
+  <g transform="translate(1020,120)">
+    <!-- openclaw -->
+    <g>
+      <rect width="320" height="58" fill="#0f0f0f" stroke="#0cce6b"/>
+      <rect x="0" y="0" width="4" height="58" fill="#0cce6b"/>
+      <text x="20" y="26" fill="#fafafa" font-size="15" font-weight="600">OpenClaw</text>
+      <text x="20" y="46" fill="#0cce6b" font-size="11">● LIVE  ·  chat · cron · push · multi-agent</text>
+    </g>
+    <!-- hermes -->
+    <g transform="translate(0,76)">
+      <rect width="320" height="58" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="58" fill="#444"/>
+      <text x="20" y="26" fill="#cfcfcf" font-size="15" font-weight="600">Hermes Agent</text>
+      <text x="20" y="46" fill="#888" font-size="11">◐ NEXT  ·  persistent-memory chat, gateway mirror</text>
+    </g>
+    <!-- paperclip -->
+    <g transform="translate(0,152)">
+      <rect width="320" height="58" fill="#0f0f0f" stroke="#1f1f1f"/>
+      <rect x="0" y="0" width="4" height="58" fill="#444"/>
+      <text x="20" y="26" fill="#cfcfcf" font-size="15" font-weight="600">Paperclip</text>
+      <text x="20" y="46" fill="#888" font-size="11">◐ NEXT  ·  agent-company dashboard, budgets, org chart</text>
+    </g>
+  </g>
+
+  <line x1="60" y1="380" x2="1340" y2="380" stroke="#1f1f1f"/>
+  <text x="60" y="408" fill="#666" font-size="12">framework author?</text>
+  <text x="220" y="408" fill="#cfcfcf" font-size="12">drop an adapter here · get a free iOS front-end · zero SDK to learn</text>
+  <text x="1080" y="408" fill="#0cce6b" font-size="12">→ open an integration issue</text>
+</svg>
