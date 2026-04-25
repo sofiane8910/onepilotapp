@@ -33,34 +33,33 @@ You get a real SSH terminal — and around it, the rest of the modern dev workfl
 ## What Onepilot is
 
 ```mermaid
-flowchart LR
-    P([📱 Onepilot])
-    subgraph T1[" "]
-      direction TB
-      L1["⌨ Terminal"]
-      L2["📝 Live file edit"]
-      L3["🌐 localhost preview"]
-      L4["🐙 GitHub PRs"]
-    end
-    subgraph T2[" "]
-      direction TB
-      R1["⚡ Deploy agents"]
-      R2["💬 Chat from your phone"]
-      R3["⏱ Cron jobs"]
-      R4["🔔 Push when done"]
-    end
-    T1 --- P --- T2
-    classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
-    classDef left fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a
-    classDef right fill:#eff6ff,stroke:#0070f3,color:#0a0a0a
-    class P root
-    class L1,L2,L3,L4 left
-    class R1,R2,R3,R4 right
-    style T1 fill:none,stroke:none
-    style T2 fill:none,stroke:none
-```
+flowchart TB
+    P(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
 
-**Pillar 1** — modern mobile terminal + dev ecosystem. **Pillar 2** — AI agent ops on your phone.
+    P ==> T["&nbsp;⌨️ &nbsp;PILLAR 1 &nbsp;·&nbsp; Modern mobile terminal&nbsp;"]
+    P ==> A["&nbsp;✦ &nbsp;PILLAR 2 &nbsp;·&nbsp; AI agent ops&nbsp;"]
+
+    T --> T1["Real SSH &nbsp;·&nbsp; mosh &nbsp;·&nbsp; port forward"]
+    T --> T2["Live file edit on the remote box"]
+    T --> T3["localhost:3000 preview in-app"]
+    T --> T4["GitHub PRs &nbsp;·&nbsp; repos &nbsp;·&nbsp; Actions"]
+
+    A --> A1["Deploy an agent in &lt; 60 seconds"]
+    A --> A2["Chat with your agents from your phone"]
+    A --> A3["Cron jobs &nbsp;·&nbsp; run-now &nbsp;·&nbsp; tail logs"]
+    A --> A4["Push notification when work finishes"]
+
+    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
+    classDef pillar1 fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
+    classDef pillar2 fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
+    classDef leaf1 fill:#ffffff,stroke:#bbf7d0,color:#0a0a0a
+    classDef leaf2 fill:#ffffff,stroke:#bfdbfe,color:#0a0a0a
+    class P root
+    class T pillar1
+    class A pillar2
+    class T1,T2,T3,T4 leaf1
+    class A1,A2,A3,A4 leaf2
+```
 
 <br>
 
@@ -76,41 +75,6 @@ flowchart LR
 ```
 
 Spin up an agent on your own server with a guided wizard. No YAML to edit, no Telegram bot to babysit. Talk to it directly from the app.
-
-<br>
-
-## See it
-
-<table>
-  <tr>
-    <td width="33%" align="center">
-      <a href="https://onepilotapp.com"><img src="docs/img/hero.webp" alt="Home dashboard" width="100%"/></a>
-      <br><sub><b>Home</b> · servers + agents at a glance</sub>
-    </td>
-    <td width="33%" align="center">
-      <a href="https://onepilotapp.com"><img src="docs/img/terminal.webp" alt="Live SSH terminal" width="100%"/></a>
-      <br><sub><b>Terminal</b> · real SSH, real PTY</sub>
-    </td>
-    <td width="33%" align="center">
-      <a href="https://onepilotapp.com"><img src="docs/img/agents.webp" alt="Agent chat" width="100%"/></a>
-      <br><sub><b>Agents</b> · chat with your fleet</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <a href="https://onepilotapp.com"><img src="docs/img/servers.webp" alt="Servers list" width="100%"/></a>
-      <br><sub><b>Servers</b> · pair, monitor, jump</sub>
-    </td>
-    <td align="center">
-      <a href="https://onepilotapp.com"><img src="docs/img/deploy.webp" alt="Agent deploy wizard" width="100%"/></a>
-      <br><sub><b>Deploy</b> · agent in &lt; 60s</sub>
-    </td>
-    <td align="center">
-      <a href="https://onepilotapp.com"><img src="docs/img/control.webp" alt="Cron + control panel" width="100%"/></a>
-      <br><sub><b>Control</b> · cron, run-now, logs</sub>
-    </td>
-  </tr>
-</table>
 
 <br>
 
