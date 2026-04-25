@@ -1,97 +1,296 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 540" width="1400" height="540" font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 880" width="1600" height="880" font-family="ui-sans-serif, -apple-system, 'SF Pro Text', system-ui, sans-serif">
   <defs>
-    <pattern id="g2" width="24" height="24" patternUnits="userSpaceOnUse">
-      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+    <pattern id="dots2" width="22" height="22" patternUnits="userSpaceOnUse">
+      <circle cx="1" cy="1" r="1" fill="#ececec"/>
     </pattern>
+    <filter id="card2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="#000" flood-opacity="0.05"/>
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#000" flood-opacity="0.04"/>
+    </filter>
+    <linearGradient id="g-grn" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0cce6b"/>
+      <stop offset="1" stop-color="#0aa055"/>
+    </linearGradient>
+    <linearGradient id="g-blu" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0070f3"/>
+      <stop offset="1" stop-color="#0058c4"/>
+    </linearGradient>
   </defs>
-  <rect width="1400" height="540" fill="#0a0a0a"/>
-  <rect width="1400" height="540" fill="url(#g2)"/>
 
-  <text x="60" y="60" fill="#666" font-size="13" letter-spacing="2">WHAT'S IN THE APP · v1.2</text>
-  <line x1="60" y1="78" x2="1340" y2="78" stroke="#1f1f1f"/>
+  <rect width="1600" height="880" fill="#ffffff"/>
+  <rect width="1600" height="880" fill="url(#dots2)" opacity="0.55"/>
 
-  <!-- 8 cards in 4x2 grid -->
+  <!-- header -->
   <g font-family="ui-monospace, 'SF Mono', Menlo, monospace">
-    <!-- row 1 -->
-    <g transform="translate(60,110)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">01 / TERMINAL</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Real SSH.</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">Real PTY.</text>
-      <text x="24" y="132" fill="#888" font-size="12">VT100, mosh, port forward, SSH</text>
-      <text x="24" y="150" fill="#888" font-size="12">keys, jump hosts. Not a toy.</text>
+    <text x="60" y="60" fill="#999" font-size="11" letter-spacing="3">EVERYTHING IN THE APP · v1.2</text>
+    <line x1="60" y1="76" x2="1540" y2="76" stroke="#eaeaea"/>
+  </g>
+  <text x="60" y="118" font-size="32" font-weight="600" fill="#0a0a0a">A real workstation. In your pocket.</text>
+  <text x="60" y="146" font-size="14" fill="#666">Every card below is a feature shipping in v1.2 — not a roadmap promise.</text>
+
+  <!-- 4-column grid: 4 wide x 2 rows -->
+  <!-- card spec: 350x280, 30 gap, start at 60,200 -->
+
+  <!-- ROW 1 — TERMINAL PILLAR (green) -->
+
+  <!-- 01 Terminal -->
+  <g transform="translate(60,200)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <!-- preview pane -->
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#0a0a0a"/>
+    <g transform="translate(16,16)">
+      <circle cx="14" cy="14" r="4" fill="#ff5f56"/>
+      <circle cx="30" cy="14" r="4" fill="#ffbd2e"/>
+      <circle cx="46" cy="14" r="4" fill="#27c93f"/>
+      <text x="159" y="18" text-anchor="middle" font-size="10" fill="#666" font-family="ui-monospace, 'SF Mono', Menlo, monospace">prod-vps</text>
     </g>
-    <g transform="translate(380,110)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">02 / FILES</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Edit live on</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">the remote.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Open, edit, save without leaving</text>
-      <text x="24" y="150" fill="#888" font-size="12">your phone. Picker included.</text>
+    <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11">
+      <text x="28" y="62" fill="#0cce6b">$ uname -a</text>
+      <text x="28" y="78" fill="#888">Linux prod-vps 6.8.0 #1 SMP</text>
+      <text x="28" y="98" fill="#0cce6b">$ docker ps</text>
+      <text x="28" y="114" fill="#888">CONTAINER  IMAGE       STATUS</text>
+      <text x="28" y="130" fill="#fafafa">a4f2…      api:v1.2    Up 3h</text>
+      <text x="28" y="146" fill="#fafafa">b1c0…      pg:16       Up 2d</text>
+      <text x="28" y="166" fill="#0cce6b">$ </text>
+      <rect x="44" y="156" width="6" height="12" fill="#0cce6b"/>
     </g>
-    <g transform="translate(700,110)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">03 / BROWSER</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">localhost:3000</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">on mobile.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Forward a port, preview your dev</text>
-      <text x="24" y="150" fill="#888" font-size="12">server in the in-app browser.</text>
-    </g>
-    <g transform="translate(1020,110)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0cce6b"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">04 / GITHUB</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">PRs, repos,</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">Actions.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Triage in line. No hopping out</text>
-      <text x="24" y="150" fill="#888" font-size="12">to a browser tab.</text>
-    </g>
-    <!-- row 2 -->
-    <g transform="translate(60,300)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">05 / AGENTS</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Deploy in</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">&lt; 60 seconds.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Guided wizard. No config files,</text>
-      <text x="24" y="150" fill="#888" font-size="12">no Telegram bot babysitting.</text>
-    </g>
-    <g transform="translate(380,300)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">06 / CHAT</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Direct chat,</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">no gateway.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Talk to your agent over</text>
-      <text x="24" y="150" fill="#888" font-size="12">Supabase Realtime, encrypted.</text>
-    </g>
-    <g transform="translate(700,300)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">07 / CRON</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Schedule,</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">run-now, watch.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Per-server agent crons. Push</text>
-      <text x="24" y="150" fill="#888" font-size="12">notification on completion.</text>
-    </g>
-    <g transform="translate(1020,300)">
-      <rect width="300" height="170" fill="#0f0f0f" stroke="#1f1f1f"/>
-      <rect x="0" y="0" width="4" height="170" fill="#0070f3"/>
-      <text x="24" y="38" fill="#666" font-size="11" letter-spacing="2">08 / KEYS</text>
-      <text x="24" y="74" fill="#fafafa" font-size="20" font-weight="600">Bring your</text>
-      <text x="24" y="98" fill="#fafafa" font-size="20" font-weight="600">own LLM.</text>
-      <text x="24" y="132" fill="#888" font-size="12">Claude, GPT, OSS. Free or</text>
-      <text x="24" y="150" fill="#888" font-size="12">paid — your key, your bill.</text>
-    </g>
+    <!-- caption -->
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-grn)"/>
+    <text x="32" y="208" font-size="10" fill="#0cce6b" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">01 · TERMINAL</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">Real SSH. Real PTY.</text>
+    <text x="16" y="256" font-size="12" fill="#666">VT100 over Citadel. Mosh, port</text>
+    <text x="16" y="270" font-size="12" fill="#666">forward, jump hosts, keys.</text>
   </g>
 
-  <line x1="60" y1="498" x2="1340" y2="498" stroke="#1f1f1f"/>
-  <text x="60" y="524" fill="#666" font-size="12">terminal pillar</text>
-  <rect x="180" y="514" width="14" height="3" fill="#0cce6b"/>
-  <text x="240" y="524" fill="#666" font-size="12">agent pillar</text>
-  <rect x="345" y="514" width="14" height="3" fill="#0070f3"/>
-  <text x="1100" y="524" fill="#666" font-size="12">→ onepilotapp.com</text>
+  <!-- 02 Files -->
+  <g transform="translate(440,200)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <!-- editor pane -->
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="24" rx="8" fill="#f0f0f0"/>
+    <rect x="16" y="32" width="318" height="8" fill="#f0f0f0"/>
+    <text x="32" y="32" font-size="10" fill="#666" font-family="ui-monospace, 'SF Mono', Menlo, monospace">⌁ handlers.go</text>
+    <text x="324" y="32" text-anchor="end" font-size="10" fill="#0cce6b" font-family="ui-monospace, 'SF Mono', Menlo, monospace">● saved</text>
+    <!-- gutter -->
+    <rect x="16" y="40" width="28" height="136" fill="#f5f5f5"/>
+    <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="9.5" fill="#bbb" text-anchor="end">
+      <text x="38" y="58">12</text><text x="38" y="74">13</text><text x="38" y="90">14</text>
+      <text x="38" y="106">15</text><text x="38" y="122">16</text><text x="38" y="138">17</text>
+      <text x="38" y="154">18</text>
+    </g>
+    <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="10">
+      <text x="50" y="58" fill="#a855f7">func</text><text x="76" y="58" fill="#0a0a0a"> Handle(w</text><text x="142" y="58" fill="#0070f3"> http</text><text x="166" y="58" fill="#666">.RW,</text>
+      <text x="50" y="74" fill="#666">      r </text><text x="98" y="74" fill="#0070f3">*http</text><text x="123" y="74" fill="#666">.Req) {</text>
+      <text x="50" y="90" fill="#a855f7">  ctx</text><text x="78" y="90" fill="#666"> := r.Context()</text>
+      <text x="50" y="106" fill="#a855f7">  if</text><text x="68" y="106" fill="#666"> err :=</text><text x="113" y="106" fill="#0a0a0a"> auth</text><text x="138" y="106" fill="#666">(ctx);</text>
+      <text x="50" y="122" fill="#666">      err != nil {</text>
+      <text x="50" y="138" fill="#666">    http.Error(w,</text>
+      <text x="50" y="154" fill="#0cce6b">      "denied"</text><text x="118" y="154" fill="#666">, 403)</text>
+    </g>
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-grn)"/>
+    <text x="32" y="208" font-size="10" fill="#0cce6b" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">02 · FILES</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">Edit live on the remote.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Open, edit, save without leaving</text>
+    <text x="16" y="270" font-size="12" fill="#666">SSH. Directory picker built in.</text>
+  </g>
+
+  <!-- 03 Browser -->
+  <g transform="translate(820,200)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="28" rx="8" fill="#f0f0f0"/>
+    <rect x="16" y="36" width="318" height="8" fill="#f0f0f0"/>
+    <g transform="translate(28,24)">
+      <circle cx="4" cy="6" r="3.5" fill="#ff5f56"/>
+      <circle cx="16" cy="6" r="3.5" fill="#ffbd2e"/>
+      <circle cx="28" cy="6" r="3.5" fill="#27c93f"/>
+    </g>
+    <rect x="68" y="22" width="252" height="16" rx="8" fill="#fff" stroke="#eaeaea"/>
+    <text x="76" y="33" font-size="9" fill="#666" font-family="ui-monospace, 'SF Mono', Menlo, monospace">🔒 localhost:3000 · forwarded</text>
+
+    <!-- page -->
+    <rect x="32" y="58" width="80" height="10" rx="2" fill="#0a0a0a"/>
+    <rect x="32" y="76" width="200" height="6" rx="2" fill="#dcdcdc"/>
+    <rect x="32" y="88" width="160" height="6" rx="2" fill="#dcdcdc"/>
+    <rect x="32" y="100" width="180" height="6" rx="2" fill="#dcdcdc"/>
+    <rect x="32" y="120" width="76" height="20" rx="4" fill="url(#g-blu)"/>
+    <text x="70" y="134" text-anchor="middle" font-size="10" fill="#fff">Get started</text>
+    <rect x="240" y="58" width="78" height="92" rx="6" fill="#fff" stroke="#eaeaea"/>
+    <rect x="248" y="68" width="58" height="6" rx="2" fill="#dcdcdc"/>
+    <rect x="248" y="80" width="40" height="6" rx="2" fill="#dcdcdc"/>
+    <circle cx="279" cy="118" r="14" fill="#0cce6b"/>
+    <text x="279" y="123" text-anchor="middle" font-size="13" fill="#fff">▸</text>
+
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-grn)"/>
+    <text x="32" y="208" font-size="10" fill="#0cce6b" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">03 · BROWSER</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">localhost:3000 on mobile.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Forward a port, preview your dev</text>
+    <text x="16" y="270" font-size="12" fill="#666">server in the in-app browser.</text>
+  </g>
+
+  <!-- 04 GitHub -->
+  <g transform="translate(1200,200)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <text x="28" y="38" font-size="11" font-weight="600" fill="#0a0a0a">sofiane8910/onepilotapp</text>
+    <text x="324" y="38" text-anchor="end" font-size="10" fill="#0cce6b">● 47 stars</text>
+    <line x1="28" y1="48" x2="320" y2="48" stroke="#eaeaea"/>
+    <!-- PR rows -->
+    <g font-family="ui-sans-serif, system-ui" font-size="11">
+      <g transform="translate(28,60)">
+        <circle cx="6" cy="8" r="5" fill="#0cce6b"/>
+        <text x="20" y="12" fill="#0a0a0a" font-weight="600">v1.2: cron-agent run-now</text>
+        <text x="20" y="26" font-size="10" fill="#666">#142 · merged · 2h ago</text>
+      </g>
+      <g transform="translate(28,98)">
+        <circle cx="6" cy="8" r="5" fill="#a855f7"/>
+        <text x="20" y="12" fill="#0a0a0a" font-weight="600">README rework — pillars</text>
+        <text x="20" y="26" font-size="10" fill="#666">#143 · open · 4 commits</text>
+      </g>
+      <g transform="translate(28,136)">
+        <circle cx="6" cy="8" r="5" fill="#0070f3"/>
+        <text x="20" y="12" fill="#0a0a0a" font-weight="600">Actions: ci/ios/build.sh</text>
+        <text x="20" y="26" font-size="10" fill="#0cce6b">✓ passed · 1m12s</text>
+      </g>
+    </g>
+
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-grn)"/>
+    <text x="32" y="208" font-size="10" fill="#0cce6b" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">04 · GITHUB</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">PRs, repos, Actions.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Triage in line. No hopping out</text>
+    <text x="16" y="270" font-size="12" fill="#666">to a browser tab.</text>
+  </g>
+
+  <!-- ROW 2 — AGENT PILLAR (blue) -->
+
+  <!-- 05 Agents -->
+  <g transform="translate(60,510)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <text x="28" y="38" font-size="11" letter-spacing="2" font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#999">DEPLOY · STEP 3 / 3</text>
+    <rect x="28" y="48" width="294" height="4" rx="2" fill="#eaeaea"/>
+    <rect x="28" y="48" width="294" height="4" rx="2" fill="url(#g-blu)"/>
+
+    <text x="28" y="80" font-size="13" fill="#0a0a0a" font-weight="600">archivist</text>
+    <text x="28" y="98" font-size="10" fill="#666" font-family="ui-monospace, 'SF Mono', Menlo, monospace">openclaw · prod-vps</text>
+
+    <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="10">
+      <text x="28" y="124" fill="#0cce6b">✓</text><text x="44" y="124" fill="#666">install runtime (nvm)</text>
+      <text x="28" y="140" fill="#0cce6b">✓</text><text x="44" y="140" fill="#666">write soul.yaml</text>
+      <text x="28" y="156" fill="#0070f3">●</text><text x="44" y="156" fill="#0a0a0a">connect to Onepilot...</text>
+    </g>
+    <rect x="240" y="146" width="80" height="22" rx="11" fill="url(#g-blu)"/>
+    <text x="280" y="161" text-anchor="middle" font-size="11" fill="#fff" font-weight="600">Finish ▸</text>
+
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-blu)"/>
+    <text x="32" y="208" font-size="10" fill="#0070f3" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">05 · AGENTS</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">Deploy in &lt; 60 seconds.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Guided wizard. No YAML, no</text>
+    <text x="16" y="270" font-size="12" fill="#666">Telegram bot to babysit.</text>
+  </g>
+
+  <!-- 06 Chat -->
+  <g transform="translate(440,510)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <!-- chat bubbles -->
+    <rect x="28" y="32" width="200" height="36" rx="14" fill="#fff" stroke="#eaeaea"/>
+    <text x="40" y="48" font-size="11" fill="#0a0a0a">DB backup ran. 3.2GB → S3.</text>
+    <text x="40" y="62" font-size="11" fill="#0a0a0a">Prune older than 30d?</text>
+
+    <rect x="120" y="80" width="200" height="22" rx="11" fill="url(#g-blu)"/>
+    <text x="132" y="95" font-size="11" fill="#fff">yes, prune. push when done.</text>
+
+    <rect x="28" y="114" width="160" height="22" rx="11" fill="#fff" stroke="#eaeaea"/>
+    <text x="40" y="129" font-size="11" fill="#0a0a0a">on it. ETA 4 min.</text>
+
+    <text x="28" y="158" font-size="9" fill="#999" font-family="ui-monospace, 'SF Mono', Menlo, monospace">supabase realtime · e2e</text>
+    <circle cx="320" cy="156" r="3" fill="#0cce6b"/>
+
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-blu)"/>
+    <text x="32" y="208" font-size="10" fill="#0070f3" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">06 · CHAT</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">Direct chat. No gateway.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Talk to your agent over Realtime,</text>
+    <text x="16" y="270" font-size="12" fill="#666">encrypted end to end.</text>
+  </g>
+
+  <!-- 07 Cron -->
+  <g transform="translate(820,510)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <g font-family="ui-monospace, 'SF Mono', Menlo, monospace">
+      <text x="28" y="38" font-size="11" fill="#999" letter-spacing="2">SCHEDULED · 3</text>
+
+      <line x1="28" y1="50" x2="320" y2="50" stroke="#eaeaea"/>
+      <text x="28" y="68" font-size="11" fill="#0a0a0a">log-rotate</text>
+      <text x="28" y="82" font-size="9" fill="#999">0 3 * * *  ·  next 02:46</text>
+      <rect x="262" y="58" width="58" height="18" rx="9" fill="#f0fdf4" stroke="#bbf7d0"/>
+      <text x="291" y="71" text-anchor="middle" font-size="9" fill="#16a34a">healthy</text>
+
+      <line x1="28" y1="96" x2="320" y2="96" stroke="#eaeaea"/>
+      <text x="28" y="114" font-size="11" fill="#0a0a0a">db-backup</text>
+      <text x="28" y="128" font-size="9" fill="#999">0 */6 * * *  ·  ran 14m</text>
+      <rect x="262" y="104" width="58" height="18" rx="9" fill="#f0fdf4" stroke="#bbf7d0"/>
+      <text x="291" y="117" text-anchor="middle" font-size="9" fill="#16a34a">healthy</text>
+
+      <line x1="28" y1="142" x2="320" y2="142" stroke="#eaeaea"/>
+      <text x="28" y="160" font-size="11" fill="#0a0a0a">triage-issues</text>
+      <text x="28" y="174" font-size="9" fill="#999">*/15 * * * *  ·  agent: archivist</text>
+      <rect x="262" y="150" width="58" height="18" rx="9" fill="#fef3c7" stroke="#fde68a"/>
+      <text x="291" y="163" text-anchor="middle" font-size="9" fill="#a16207">running</text>
+    </g>
+
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-blu)"/>
+    <text x="32" y="208" font-size="10" fill="#0070f3" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">07 · CRON</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">Schedule. Run-now. Watch.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Per-server agent crons. Push</text>
+    <text x="16" y="270" font-size="12" fill="#666">notification on completion.</text>
+  </g>
+
+  <!-- 08 Keys -->
+  <g transform="translate(1200,510)" filter="url(#card2)">
+    <rect width="350" height="280" rx="14" fill="#ffffff" stroke="#eaeaea"/>
+    <rect x="16" y="16" width="318" height="160" rx="8" fill="#fafafa" stroke="#eaeaea"/>
+    <text x="28" y="38" font-size="11" letter-spacing="2" font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#999">PROVIDER KEYS</text>
+
+    <g font-family="ui-sans-serif, system-ui" font-size="11">
+      <g transform="translate(28,52)">
+        <rect width="294" height="32" rx="8" fill="#fff" stroke="#eaeaea"/>
+        <rect x="10" y="8" width="16" height="16" rx="4" fill="#d97706"/>
+        <text x="34" y="20" font-weight="600" fill="#0a0a0a">Anthropic · Claude</text>
+        <text x="284" y="20" text-anchor="end" font-size="10" fill="#0cce6b">● active</text>
+        <text x="34" y="30" font-size="9" fill="#999" font-family="ui-monospace, 'SF Mono', Menlo, monospace">sk-ant-•••• 9f2c</text>
+      </g>
+      <g transform="translate(28,92)">
+        <rect width="294" height="32" rx="8" fill="#fff" stroke="#eaeaea"/>
+        <rect x="10" y="8" width="16" height="16" rx="4" fill="#0a0a0a"/>
+        <text x="34" y="20" font-weight="600" fill="#0a0a0a">OpenAI · GPT</text>
+        <text x="284" y="20" text-anchor="end" font-size="10" fill="#999">linked</text>
+        <text x="34" y="30" font-size="9" fill="#999" font-family="ui-monospace, 'SF Mono', Menlo, monospace">sk-•••• 4a01</text>
+      </g>
+      <g transform="translate(28,132)">
+        <rect width="294" height="32" rx="8" fill="#fff" stroke="#eaeaea" stroke-dasharray="3 3"/>
+        <rect x="10" y="8" width="16" height="16" rx="4" fill="#a855f7"/>
+        <text x="34" y="20" font-weight="600" fill="#0a0a0a">+ Add provider</text>
+        <text x="34" y="30" font-size="9" fill="#999">OSS, local, custom endpoint</text>
+      </g>
+    </g>
+
+    <rect x="16" y="196" width="6" height="14" fill="url(#g-blu)"/>
+    <text x="32" y="208" font-size="10" fill="#0070f3" letter-spacing="3" font-family="ui-monospace, 'SF Mono', Menlo, monospace">08 · LLM KEYS</text>
+    <text x="16" y="234" font-size="18" font-weight="600" fill="#0a0a0a">Bring your own LLM.</text>
+    <text x="16" y="256" font-size="12" fill="#666">Claude, GPT, OSS. Your key,</text>
+    <text x="16" y="270" font-size="12" fill="#666">your bill — no markup from us.</text>
+  </g>
+
+  <!-- footer -->
+  <line x1="60" y1="830" x2="1540" y2="830" stroke="#eaeaea"/>
+  <g font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="11">
+    <rect x="60" y="850" width="14" height="3" fill="url(#g-grn)"/>
+    <text x="80" y="855" fill="#666">terminal pillar</text>
+    <rect x="200" y="850" width="14" height="3" fill="url(#g-blu)"/>
+    <text x="220" y="855" fill="#666">agent pillar</text>
+    <text x="1380" y="855" text-anchor="end" fill="#666">all features available in the</text>
+    <text x="1540" y="855" text-anchor="end" fill="#0070f3">free tier ↗</text>
+  </g>
 </svg>
