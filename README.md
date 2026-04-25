@@ -98,9 +98,9 @@ The agent layer comes from the same observation: running an AI agent on your ser
 flowchart TB
     A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
     A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT&nbsp;<br/><sub>plugins/&lt;framework&gt;/</sub>"]
-    B ==> C["🤖 &nbsp;OpenClaw &nbsp;·&nbsp; LIVE&nbsp;<br/><sub>chat &nbsp;·&nbsp; cron &nbsp;·&nbsp; multi-agent &nbsp;·&nbsp; push</sub>"]
-    B -.-> D["🧠 &nbsp;Hermes &nbsp;·&nbsp; next&nbsp;<br/><sub>persistent-memory chat &nbsp;·&nbsp; gateway mirror</sub>"]
-    B -.-> E["🧷 &nbsp;Paperclip &nbsp;·&nbsp; next&nbsp;<br/><sub>agent-company dashboard &nbsp;·&nbsp; budgets</sub>"]
+    B ==> C["<b>🤖 &nbsp;OpenClaw</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
+    B -.-> D["<b>🧠 &nbsp;Hermes</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
+    B -.-> E["<b>🧷 &nbsp;Paperclip</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
 
     classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
     classDef pool fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
