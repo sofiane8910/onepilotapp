@@ -128,7 +128,7 @@ This repo is the **public plugin pool** that powers Onepilot's agent pillar. Eve
 |---|---|---|---|
 | <img src="docs/img/openclaw-logo.png" width="28" align="left"/> &nbsp;[**OpenClaw**](https://github.com/openclaw/openclaw) | [`openclaw/onepilot-channel`](./plugins/openclaw/onepilot-channel) | ✅ **Live** | Chat, cron, multi-agent, push alerts |
 | <img src="docs/img/hermes-logo.png" width="28" align="left"/> &nbsp;[**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | 🚧 Next | Persistent-memory chat, multi-channel gateway mirror |
-| [**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
+| <img src="docs/img/paperclip-logo.png" width="28" align="left"/> &nbsp;[**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
 
 Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new).
 
