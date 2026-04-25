@@ -124,47 +124,13 @@ This repo is the **public plugin pool** that powers Onepilot's agent pillar. Eve
 
 ## Supported frameworks
 
-Every framework gets its own mascot — same cloud, reskinned in the framework's signature.
+| Framework | Plugin | Status | What it adds to Onepilot |
+|---|---|---|---|
+| <img src="docs/img/openclaw-logo.png" width="28" align="left"/> &nbsp;[**OpenClaw**](https://github.com/openclaw/openclaw) | [`openclaw/onepilot-channel`](./plugins/openclaw/onepilot-channel) | ✅ **Live** | Chat, cron, multi-agent, push alerts |
+| <img src="docs/img/hermes-logo.png" width="28" align="left"/> &nbsp;[**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | 🚧 Next | Persistent-memory chat, multi-channel gateway mirror |
+| [**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
 
-<table>
-  <tr>
-    <td width="33%" align="center" valign="top">
-      <img src="docs/img/openclaw-logo.png" alt="OpenClaw" width="140"/>
-      <br><br>
-      <a href="https://github.com/openclaw/openclaw"><b>OpenClaw</b></a>
-      <br>
-      <sub>✅ <b>LIVE</b></sub>
-      <br><br>
-      <sub>chat · cron · multi-agent<br>push alerts</sub>
-      <br><br>
-      <a href="./plugins/openclaw/onepilot-channel"><sub><code>openclaw/onepilot-channel</code></sub></a>
-    </td>
-    <td width="33%" align="center" valign="top">
-      <img src="docs/img/hermes-logo.png" alt="Hermes" width="140"/>
-      <br><br>
-      <a href="https://hermes-agent.nousresearch.com/"><b>Hermes Agent</b></a>
-      <br>
-      <sub>🚧 NEXT</sub>
-      <br><br>
-      <sub>persistent-memory chat<br>multi-channel gateway mirror</sub>
-      <br><br>
-      <a href="./plugins/hermes"><sub><code>hermes/*</code></sub></a>
-    </td>
-    <td width="33%" align="center" valign="top">
-      <img src="docs/img/onepilot-logo.png" alt="Paperclip slot" width="140" style="opacity:0.35"/>
-      <br><br>
-      <a href="https://github.com/paperclipai/paperclip"><b>Paperclip</b></a>
-      <br>
-      <sub>🚧 NEXT</sub>
-      <br><br>
-      <sub>agent-company dashboard<br>budgets · org chart on mobile</sub>
-      <br><br>
-      <a href="./plugins/paperclip"><sub><code>paperclip/*</code></sub></a>
-    </td>
-  </tr>
-</table>
-
-Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new) — we'll cloud-ify it.
+Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new).
 
 <br>
 
@@ -207,8 +173,6 @@ CI picks up the tag, packs the right subdirectory, and uploads the tarball as a 
 <br>
 
 <div align="center">
-
-<img src="docs/img/onepilot-logo.png" alt="" width="80"/>
 
 ### Onepilot — your phone is the remote, your agents do the work.
 
