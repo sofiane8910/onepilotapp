@@ -4,24 +4,24 @@
 // agent replies back so the app can receive them via push notification.
 //
 // Architecture:
-//   1. App writes user row through the sync bus.
+//   1. App writes user row through the backend.
 //   2. This plugin (running inside the gateway process) receives the new
-//      message event.
+//      message event over the inbound channel.
 //   3. Plugin calls http://127.0.0.1:<gatewayPort>/v1/chat/completions locally.
 //      The caller is the gateway itself, so there's no external client that can
 //      disconnect — the LLM call always runs to completion, regardless of the
 //      app's lifecycle (this is why force-quit works).
-//   4. Plugin posts the reply to the ingest endpoint.
+//   4. Plugin posts the reply back through the message endpoint.
 //   5. A backend trigger fires the push notification to the app.
 
 import { definePluginEntry } from "openclaw/plugin-sdk/core";
-import { startRealtimeSubscription } from "./realtime.js";
+import { startStreamSubscription } from "./stream.js";
 import { handleUserMessage } from "./messaging.js";
 import { sendOnepilotText } from "./outbound.js";
 
 // Module-level dedupe. OpenClaw calls `register` multiple times per gateway
 // lifetime (once per registration mode, plus re-registrations after config
-// changes). If we create a new Realtime subscription per call, we get
+// changes). If we create a new channel subscription per call, we get
 // duplicate onInsert fires and a race against the gateway's chat-completions
 // handler that corrupts `workspace-state.json`. Keep one subscription per
 // accountId, ever, per process.
@@ -30,11 +30,6 @@ const _activeSubscriptions = new Map();
 // Same shape: register the outbound `onepilot` channel exactly once per
 // gateway process, regardless of how many times `register` is invoked.
 let _channelRegistered = false;
-
-// Per-account access-token getter. Populated when each subscription starts
-// (so it shares the live, rotated token from the realtime refresh flow).
-// Outbound reads from here at send-time.
-const _accountTokenGetters = new Map();
 
 export default definePluginEntry({
   id: "onepilot",
@@ -58,9 +53,6 @@ export default definePluginEntry({
       }`,
     );
 
-    // Gateway port + token are read from the resolved top-level config. They
-    // live inside `api.config.gateway` — shape matches what `openclaw config
-    // get gateway` shows.
     const gatewayPort = Number(api.config?.gateway?.port) || 18789;
     const gatewayToken =
       api.config?.gateway?.auth?.token ||
@@ -73,21 +65,8 @@ export default definePluginEntry({
       );
     }
 
-    // Register `onepilot` as a real outbound channel so OpenClaw's cron
-    // (and any other outbound delivery path) can dispatch to it. Without
-    // this, cron jobs fail at fire-time with "channel is required" because
-    // the channel resolver can't find an `onepilot` entry in the registry.
-    // Inbound stays on the sync subscription below — the channel is
-    // outbound-only.
     if (!_channelRegistered && typeof api.registerChannel === "function") {
       try {
-        // ChannelPlugin requires a `config` adapter even for outbound-only
-        // plugins: openclaw's listConfiguredMessageChannels iterates every
-        // registered plugin and calls plugin.config.listAccountIds(cfg) when
-        // resolving the default delivery channel. Without it we'd crash any
-        // auto-resolution path. Read from the same path iOS writes to —
-        // `plugins.entries.onepilot.config.accounts` — so the adapter sees
-        // the live config, not the snapshot captured at register() time.
         const readAccounts = (cfg) =>
           cfg?.plugins?.entries?.onepilot?.config?.accounts ??
           cfg?.plugins?.entries?.onepilot?.accounts ??
@@ -108,18 +87,10 @@ export default definePluginEntry({
                 return a ? { accountId, ...a } : null;
               },
               isEnabled: (account) => account?.enabled !== false,
-              // Onepilot routing is fully baked into the account config
-              // (userId + agentProfileId + sessionKey) — there's no per-
-              // recipient address like a phone number. When the outbound
-              // dispatcher asks for a default target (e.g. cron jobs
-              // created without `--to`), hand back the account's
-              // sessionKey. Otherwise openclaw throws
-              // "Delivering to Onepilot requires target" before sendText
-              // is ever invoked. (See openclaw/src/infra/outbound/targets.ts:223.)
               resolveDefaultTo: ({ cfg, accountId }) => {
-                const accounts = readAccounts(cfg);
-                const id = accountId ?? Object.keys(accounts)[0];
-                return accounts[id]?.sessionKey ?? "main";
+                const entries = readAccounts(cfg);
+                const id = accountId ?? Object.keys(entries)[0];
+                return entries[id]?.sessionKey ?? "main";
               },
             },
             outbound: {
@@ -128,15 +99,6 @@ export default definePluginEntry({
                 sendOnepilotText({
                   ctx,
                   accounts,
-                  getAccessToken: async (id) => {
-                    const getter = _accountTokenGetters.get(id);
-                    if (!getter) {
-                      throw new Error(
-                        `onepilot: no access-token getter for account "${id}" (subscription not yet started)`,
-                      );
-                    }
-                    return getter();
-                  },
                   log: (m, err) => {
                     if (err) api.logger.warn?.(`[onepilot:outbound] ${m}: ${String(err)}`);
                     else api.logger.info?.(`[onepilot:outbound] ${m}`);
@@ -166,16 +128,8 @@ export default definePluginEntry({
         continue;
       }
       const missing = [];
-      for (const field of ["supabaseUrl", "supabaseAnonKey", "userId", "agentProfileId", "sessionKey"]) {
+      for (const field of ["backendUrl", "streamUrl", "publishableKey", "agentKey", "userId", "agentProfileId", "sessionKey"]) {
         if (!account?.[field]) missing.push(field);
-      }
-      // Auth: `pluginJwt` (long-lived per-agent JWT minted by the
-      // mint-plugin-jwt edge function) is the preferred credential — it
-      // avoids the shared-session refresh_token rotation race that wedged
-      // multi-agent setups. `userRefreshToken` is still accepted for
-      // backwards compatibility with installs that predate the switch.
-      if (!account?.pluginJwt && !account?.userRefreshToken) {
-        missing.push("pluginJwt or userRefreshToken");
       }
       if (missing.length > 0) {
         warn(`[${accountId}] missing required config fields: ${missing.join(", ")}`);
@@ -183,42 +137,33 @@ export default definePluginEntry({
       }
 
       log(
-        `[${accountId}] starting Realtime subscription ` +
+        `[${accountId}] starting inbound channel subscription ` +
           `user=${String(account.userId).slice(0, 8)} ` +
           `agent=${String(account.agentProfileId).slice(0, 8)}`,
       );
 
-      // Shared access-token state for Realtime (auth) and messaging (REST)
-      // and outbound. With `pluginJwt` set, the token is static — no refresh
-      // flow needed.
-      let cachedAccessToken = account.pluginJwt ?? null;
-      const getAccessToken = () => {
-        if (cachedAccessToken) return Promise.resolve(cachedAccessToken);
-        return refreshAccessToken(account).then((t) => {
-          cachedAccessToken = t;
-          return t;
-        });
-      };
-      _accountTokenGetters.set(accountId, getAccessToken);
-
-      // Postgres UUIDs are stored lowercase. iOS sends uppercase (Swift's
-      // default uuidString format), which causes Realtime's string-compare
-      // filter to match zero rows. Normalize here once.
+      // Lowercase the routing IDs once. iOS sends uppercase UUIDs (Swift's
+      // default) but the backend stores the canonical lowercase form.
       const userIdLc = String(account.userId).toLowerCase();
       const agentProfileIdLc = String(account.agentProfileId).toLowerCase();
 
-      const sub = startRealtimeSubscription({
+      const sub = startStreamSubscription({
         accountId,
-        supabaseUrl: account.supabaseUrl,
-        supabaseAnonKey: account.supabaseAnonKey,
-        userRefreshToken: account.userRefreshToken,
-        staticAccessToken: account.pluginJwt,
+        backendUrl: account.backendUrl,
+        streamUrl: account.streamUrl,
+        publishableKey: account.publishableKey,
+        agentKey: account.agentKey,
         userId: userIdLc,
         schema: "public",
         table: "messages",
         filter: `user_id=eq.${userIdLc}`,
-        onAccessToken: (t) => {
-          cachedAccessToken = t;
+        // Evict on terminal auth failure (agent key revoked). iOS must
+        // re-pair the agent to get a new key; when that config lands via
+        // hot-reload, register() creates a fresh subscription.
+        onTerminal: ({ reason }) => {
+          _activeSubscriptions.delete(accountId);
+          warn(`[${accountId}] channel auth permanently failed, evicted — awaiting re-pair`);
+          warn(`[${accountId}] reason: ${reason}`);
         },
         onInsert: (row) => {
           if (row?.role !== "user") return;
@@ -240,7 +185,6 @@ export default definePluginEntry({
             userMessageRow: row,
             gatewayPort,
             gatewayToken,
-            getAccessToken,
             log: (m, err) => {
               if (err) api.logger.warn?.(`[onepilot:${accountId}:dispatch] ${m}: ${String(err)}`);
               else api.logger.info?.(`[onepilot:${accountId}:dispatch] ${m}`);
@@ -248,8 +192,8 @@ export default definePluginEntry({
           });
         },
         log: (m, err) => {
-          if (err) api.logger.warn?.(`[onepilot:${accountId}:rt] ${m}: ${String(err)}`);
-          else api.logger.info?.(`[onepilot:${accountId}:rt] ${m}`);
+          if (err) api.logger.warn?.(`[onepilot:${accountId}:stream] ${m}: ${String(err)}`);
+          else api.logger.info?.(`[onepilot:${accountId}:stream] ${m}`);
         },
       });
 
@@ -260,22 +204,3 @@ export default definePluginEntry({
     log(`${subscriptions.length} subscription(s) active`);
   },
 });
-
-async function refreshAccessToken(account) {
-  const url = `${account.supabaseUrl}/auth/v1/token?grant_type=refresh_token`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "apikey": account.supabaseAnonKey,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refresh_token: account.userRefreshToken }),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`refresh failed: ${res.status} ${body.slice(0, 200)}`);
-  }
-  const json = await res.json();
-  if (!json.access_token) throw new Error("no access_token in refresh response");
-  return json.access_token;
-}

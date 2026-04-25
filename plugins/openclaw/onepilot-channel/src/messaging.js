@@ -1,14 +1,14 @@
 // Outbound dispatch: take a user message event, run the agent via the
 // gateway's OpenAI-compatible endpoint, post the reply back through the
-// ingest endpoint.
+// backend message endpoint.
 //
 // Why self-fetch to the gateway instead of OpenClaw's native channel dispatch:
-//   - zero SDK coupling (no channel registration, no `createChatChannelPlugin` scaffolding)
-//   - fetch caller lives inside the gateway process → no external client to
+//   - zero SDK coupling (no channel registration scaffolding for inbound)
+//   - the caller lives inside the gateway process → no external client to
 //     disconnect → the LLM call always runs to completion, regardless of
 //     mobile-app lifecycle (force-quit survives)
-//   - we already have the persistence path wired (ingest endpoint → push
-//     trigger). No new backend code.
+//   - we already have the persistence path wired (backend → push trigger).
+//     No new backend code.
 
 import { getAgentId } from "./env.js";
 
@@ -19,13 +19,14 @@ const HISTORY_LIMIT = 20;
  *   api: any,
  *   accountId: string,
  *   account: {
- *     supabaseUrl: string,
- *     supabaseAnonKey: string,
+ *     backendUrl: string,
+ *     streamUrl: string,
+ *     publishableKey: string,
+ *     agentKey: string,
  *     userId: string,
  *     agentProfileId: string,
  *     sessionKey: string,
  *   },
- *   getAccessToken: () => Promise<string>,
  *   userMessageRow: any,
  *   gatewayPort: number,
  *   gatewayToken: string,
@@ -33,42 +34,42 @@ const HISTORY_LIMIT = 20;
  * }} params
  */
 export async function handleUserMessage(params) {
-  const { api, accountId, account, getAccessToken, userMessageRow, gatewayPort, gatewayToken, log } = params;
+  const { api, accountId, account, userMessageRow, gatewayPort, gatewayToken, log } = params;
   const sessionId = userMessageRow.session_id;
   if (!sessionId) {
     log(`user row missing session_id, skipping`);
     return;
   }
 
-  // Skip if an assistant reply already exists for this user message
-  // (foreground race: iOS SSE may have landed faster).
+  // Load history. If an assistant reply newer than this user message already
+  // exists in the returned set, a foreground client already answered —
+  // skip to avoid double-reply.
+  let history;
   try {
-    const jwt = await getAccessToken();
-    const checkUrl = `${account.supabaseUrl}/rest/v1/messages?select=id&session_id=eq.${sessionId}&role=eq.assistant&created_at=gt.${encodeURIComponent(userMessageRow.created_at)}&limit=1`;
-    const checkRes = await fetch(checkUrl, {
-      headers: { apikey: account.supabaseAnonKey, Authorization: `Bearer ${jwt}` },
-    });
-    if (checkRes.ok) {
-      const rows = await checkRes.json();
-      if (Array.isArray(rows) && rows.length > 0) {
-        log(`session ${String(sessionId).slice(0, 8)} already has an assistant reply — skipping`);
-        return;
-      }
-    }
-  } catch (err) {
-    log(`already-answered probe failed (continuing): ${String(err)}`);
-  }
-
-  // Build message history.
-  let messages;
-  try {
-    messages = await loadHistory(account, sessionId, await getAccessToken());
+    history = await loadHistory(account, sessionId);
   } catch (err) {
     log(`failed to load history`, err);
     return;
   }
 
-  // Fire the agent via the local gateway. `stream: false` gets us a single JSON.
+  const userCreatedAt = userMessageRow.created_at;
+  if (Array.isArray(history)) {
+    const hasNewerAssistant = history.some(
+      (row) =>
+        row?.role === "assistant" &&
+        typeof row?.created_at === "string" &&
+        typeof userCreatedAt === "string" &&
+        row.created_at > userCreatedAt,
+    );
+    if (hasNewerAssistant) {
+      log(`session ${String(sessionId).slice(0, 8)} already has an assistant reply — skipping`);
+      return;
+    }
+  }
+
+  const messages = normalizeHistory(history);
+
+  // Fire the agent via the local gateway.
   //
   // The `x-openclaw-message-channel: onepilot` header tells openclaw's
   // session/runtime layer that this turn belongs to the `onepilot` channel.
@@ -141,57 +142,53 @@ export async function handleUserMessage(params) {
     return;
   }
 
-  // Deliver the reply back via the ingest endpoint.
-  // Auth: user's own access token (reused from the refresh flow). The ingest
-  // endpoint verifies the token belongs to the userId we claim in the body.
-  // UUIDs are lowercased to match the backend's canonical form — see
-  // CLAUDE.md "UUID case" section.
+  // Deliver the reply back via the backend message endpoint. Auth is the
+  // durable agent key — the endpoint binds (userId, agentProfileId) to the
+  // key server-side, so a stolen key cannot post into another user's inbox.
+  // UUIDs lowercased to match canonical form (see CLAUDE.md "UUID case").
   try {
-    const ingestJwt = await getAccessToken();
     const userIdLc = String(account.userId).toLowerCase();
     const agentProfileIdLc = String(account.agentProfileId).toLowerCase();
-    const ingestUrl = `${account.supabaseUrl}/functions/v1/openclaw-message-ingest`;
-    const deliverRes = await fetch(ingestUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${ingestJwt}`,
-      },
-      body: JSON.stringify({
-        userId: userIdLc,
-        agentProfileId: agentProfileIdLc,
-        sessionKey: userMessageRow.session_key ?? account.sessionKey,
-        role: "assistant",
-        content: [{ type: "text", text: reply }],
-        timestamp: Date.now(),
-      }),
+    const url = `${account.backendUrl}/functions/v1/agent-message-ingest`;
+    const deliverBody = JSON.stringify({
+      userId: userIdLc,
+      agentProfileId: agentProfileIdLc,
+      sessionKey: userMessageRow.session_key ?? account.sessionKey,
+      role: "assistant",
+      content: [{ type: "text", text: reply }],
+      timestamp: Date.now(),
     });
+    // Retry on Supabase Edge Runtime transient 5xx (see outbound.js).
+    const deliverRes = await postIngestWithRetry(url, account.agentKey, deliverBody, log);
     if (!deliverRes.ok) {
       const body = await deliverRes.text();
-      log(`ingest POST returned ${deliverRes.status}: ${body.slice(0, 200)}`);
+      log(`message POST returned ${deliverRes.status}: ${body.slice(0, 200)}`);
       return;
     }
     log(`assistant reply delivered (${reply.length} chars)`);
   } catch (err) {
-    log(`ingest POST failed`, err);
+    log(`message POST failed`, err);
   }
 }
 
-async function loadHistory(account, sessionId, jwt) {
-  // Fetch the MOST RECENT messages, then reverse to chronological order.
-  // Previously this used order=asc which returned the first 20 messages ever
-  // written to the session — so after a session accumulated >20 messages,
-  // every new turn saw only ancient history and never the user's current
-  // request. The LLM kept re-answering old prompts.
-  const url = `${account.supabaseUrl}/rest/v1/messages?select=role,content,created_at&session_id=eq.${sessionId}&order=created_at.desc&limit=${HISTORY_LIMIT}`;
+async function loadHistory(account, sessionId) {
+  // Fetch most recent messages in DESC order. The backend endpoint binds
+  // (userId, agentProfileId) to the agentKey — we cannot see anyone else's
+  // messages even if the session_id were guessed.
+  const url = `${account.backendUrl}/functions/v1/agent-message-history?session_id=${encodeURIComponent(sessionId)}&limit=${HISTORY_LIMIT}`;
   const res = await fetch(url, {
-    headers: { apikey: account.supabaseAnonKey, Authorization: `Bearer ${jwt}` },
+    method: "GET",
+    headers: { Authorization: `Bearer ${account.agentKey}` },
   });
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`history load failed: ${res.status} ${body.slice(0, 200)}`);
   }
-  const rows = await res.json();
+  const json = await res.json();
+  return Array.isArray(json?.messages) ? json.messages : [];
+}
+
+function normalizeHistory(rows) {
   return rows
     .slice()
     .reverse()
@@ -200,10 +197,8 @@ async function loadHistory(account, sessionId, jwt) {
 }
 
 function extractText(content) {
-  // Stored content can be a string, a nested JSON string, or an array.
   if (content == null) return "";
   if (typeof content === "string") {
-    // Maybe JSON-encoded
     try {
       return extractText(JSON.parse(content));
     } catch {
@@ -218,6 +213,32 @@ function extractText(content) {
   }
   if (typeof content === "object" && typeof content.text === "string") return content.text;
   return "";
+}
+
+async function postIngestWithRetry(url, agentKey, body, log) {
+  const delays = [250, 750];
+  let lastRes;
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      lastRes = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${agentKey}`,
+        },
+        body,
+      });
+    } catch (err) {
+      if (attempt === delays.length) throw err;
+      log(`ingest network error (attempt ${attempt + 1}), retrying: ${err?.message ?? err}`);
+      await new Promise((r) => setTimeout(r, delays[attempt]));
+      continue;
+    }
+    if (lastRes.status < 500 || attempt === delays.length) return lastRes;
+    log(`ingest got ${lastRes.status} (attempt ${attempt + 1}), retrying`);
+    await new Promise((r) => setTimeout(r, delays[attempt]));
+  }
+  return lastRes;
 }
 
 function extractAssistantText(completion) {

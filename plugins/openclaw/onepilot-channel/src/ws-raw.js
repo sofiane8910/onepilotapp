@@ -9,7 +9,7 @@
 // WebSocket. We sidestep it by doing the upgrade by hand with `https.request`
 // + `Upgrade: websocket` and speaking the wire protocol directly.
 //
-// Only supports what we need for our sync bus:
+// Only supports what we need for our inbound channel:
 //   - Text frames (server → us, us → server)
 //   - Close frames
 //   - No compression, no binary, no fragmentation (server doesn't send these)
