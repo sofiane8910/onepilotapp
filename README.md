@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/img/onepilot-logo.png" alt="Onepilot" width="160"/>
+
 # Onepilot
 
 ### The mobile terminal for modern developers — with an AI agent layer built in.
@@ -98,18 +100,20 @@ The agent layer comes from the same observation: running an AI agent on your ser
 flowchart TB
     A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
     A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT&nbsp;<br/><sub>plugins/&lt;framework&gt;/</sub>"]
-    B ==> C["<b>🤖 &nbsp;OpenClaw</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
-    B -.-> D["<b>🧠 &nbsp;Hermes</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
+    B ==> C["<b>🦀 &nbsp;OpenClaw</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
+    B -.-> D["<b>⚔️ &nbsp;Hermes</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
     B -.-> E["<b>🧷 &nbsp;Paperclip</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
 
-    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
-    classDef pool fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
-    classDef live fill:#ffffff,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
-    classDef next fill:#fafafa,stroke:#d4d4d4,color:#666
+    classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
+    classDef pool fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
+    classDef openclaw fill:#fff7ed,stroke:#fb923c,color:#0a0a0a,font-weight:bold
+    classDef hermes fill:#f0fdf4,stroke:#14532d,color:#0a0a0a
+    classDef paperclip fill:#fafafa,stroke:#d4d4d4,color:#666
     class A root
     class B pool
-    class C live
-    class D,E next
+    class C openclaw
+    class D hermes
+    class E paperclip
 ```
 
 This repo is the **public plugin pool** that powers Onepilot's agent pillar. Every framework we integrate with ships its adapter here. When you pair a server in the app, the right adapter is fetched automatically.
@@ -120,13 +124,47 @@ This repo is the **public plugin pool** that powers Onepilot's agent pillar. Eve
 
 ## Supported frameworks
 
-| Framework | Plugin | Status | What it adds to Onepilot |
-|---|---|---|---|
-| [**OpenClaw**](https://github.com/openclaw/openclaw) | [`openclaw/onepilot-channel`](./plugins/openclaw/onepilot-channel) | ✅ **Live** | Chat, cron, multi-agent, push alerts |
-| [**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | 🚧 Next | Persistent-memory chat, multi-channel gateway mirror |
-| [**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
+Every framework gets its own mascot — same cloud, reskinned in the framework's signature.
 
-Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new).
+<table>
+  <tr>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/img/openclaw-logo.png" alt="OpenClaw" width="140"/>
+      <br><br>
+      <a href="https://github.com/openclaw/openclaw"><b>OpenClaw</b></a>
+      <br>
+      <sub>✅ <b>LIVE</b></sub>
+      <br><br>
+      <sub>chat · cron · multi-agent<br>push alerts</sub>
+      <br><br>
+      <a href="./plugins/openclaw/onepilot-channel"><sub><code>openclaw/onepilot-channel</code></sub></a>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/img/hermes-logo.png" alt="Hermes" width="140"/>
+      <br><br>
+      <a href="https://hermes-agent.nousresearch.com/"><b>Hermes Agent</b></a>
+      <br>
+      <sub>🚧 NEXT</sub>
+      <br><br>
+      <sub>persistent-memory chat<br>multi-channel gateway mirror</sub>
+      <br><br>
+      <a href="./plugins/hermes"><sub><code>hermes/*</code></sub></a>
+    </td>
+    <td width="33%" align="center" valign="top">
+      <img src="docs/img/onepilot-logo.png" alt="Paperclip slot" width="140" style="opacity:0.35"/>
+      <br><br>
+      <a href="https://github.com/paperclipai/paperclip"><b>Paperclip</b></a>
+      <br>
+      <sub>🚧 NEXT</sub>
+      <br><br>
+      <sub>agent-company dashboard<br>budgets · org chart on mobile</sub>
+      <br><br>
+      <a href="./plugins/paperclip"><sub><code>paperclip/*</code></sub></a>
+    </td>
+  </tr>
+</table>
+
+Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new) — we'll cloud-ify it.
 
 <br>
 
@@ -169,6 +207,8 @@ CI picks up the tag, packs the right subdirectory, and uploads the tarball as a 
 <br>
 
 <div align="center">
+
+<img src="docs/img/onepilot-logo.png" alt="" width="80"/>
 
 ### Onepilot — your phone is the remote, your agents do the work.
 
