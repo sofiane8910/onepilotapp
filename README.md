@@ -34,20 +34,26 @@ You get a real SSH terminal — and around it, the rest of the modern dev workfl
 
 ```mermaid
 flowchart TB
-    P(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
+    P(["📱 &nbsp;&nbsp;ONEPILOT iOS&nbsp;&nbsp;"])
 
-    P ==> T["&nbsp;⌨️ &nbsp;PILLAR 1 &nbsp;·&nbsp; Modern mobile terminal&nbsp;"]
-    P ==> A["&nbsp;✦ &nbsp;PILLAR 2 &nbsp;·&nbsp; AI agent ops&nbsp;"]
+    P ==> T["&nbsp;⌨️ &nbsp;&nbsp;PILLAR 1 &nbsp;&nbsp;·&nbsp;&nbsp; Modern mobile terminal&nbsp;"]
+    P ==> A["&nbsp;✦ &nbsp;&nbsp;PILLAR 2 &nbsp;&nbsp;·&nbsp;&nbsp; AI agent ops&nbsp;"]
 
     T --> T1["Real SSH &nbsp;·&nbsp; mosh &nbsp;·&nbsp; port forward"]
-    T --> T2["Live file edit on the remote box"]
-    T --> T3["localhost:3000 preview in-app"]
-    T --> T4["GitHub PRs &nbsp;·&nbsp; repos &nbsp;·&nbsp; Actions"]
+    T1 --> T2["Live file edit on the remote box"]
+    T2 --> T3["localhost:3000 preview in-app browser"]
+    T3 --> T4["GitHub PRs &nbsp;·&nbsp; repos &nbsp;·&nbsp; Actions"]
+    T4 --> T5["Cron monitor &nbsp;·&nbsp; directory picker"]
 
     A --> A1["Deploy an agent in &lt; 60 seconds"]
-    A --> A2["Chat with your agents from your phone"]
-    A --> A3["Cron jobs &nbsp;·&nbsp; run-now &nbsp;·&nbsp; tail logs"]
-    A --> A4["Push notification when work finishes"]
+    A1 --> A2["Chat with your agents from your phone"]
+    A2 --> A3["Cron jobs &nbsp;·&nbsp; run-now &nbsp;·&nbsp; tail logs"]
+    A3 --> A4["Push notification when work finishes"]
+    A4 --> A5["Bring your own LLM key &nbsp;·&nbsp; Claude, GPT, OSS"]
+
+    linkStyle 0,1 stroke:#0a0a0a,stroke-width:2px
+    linkStyle 2,3,4,5,6 stroke:#0cce6b,stroke-width:1.5px
+    linkStyle 7,8,9,10,11 stroke:#0070f3,stroke-width:1.5px
 
     classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
     classDef pillar1 fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
@@ -57,8 +63,8 @@ flowchart TB
     class P root
     class T pillar1
     class A pillar2
-    class T1,T2,T3,T4 leaf1
-    class A1,A2,A3,A4 leaf2
+    class T1,T2,T3,T4,T5 leaf1
+    class A1,A2,A3,A4,A5 leaf2
 ```
 
 <br>
@@ -66,22 +72,12 @@ flowchart TB
 ## How agents work
 
 ```mermaid
-flowchart TB
-    A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
-    A -- "chat &nbsp;·&nbsp; cron &nbsp;·&nbsp; run-now" --> B[("🔄 &nbsp;Realtime sync &nbsp;·&nbsp; encrypted&nbsp;")]
-    B -- "command" --> C["🖥 &nbsp;Your server &nbsp;(any VPS, Mac, Pi)&nbsp;"]
-    C --> D["🤖 &nbsp;OpenClaw agent runtime&nbsp;"]
-    D -- "result &nbsp;·&nbsp; logs" --> B
-    B -- "🔔 &nbsp;push notification" --> A
-
-    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
-    classDef sync fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
-    classDef server fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
-    classDef agent fill:#ffffff,stroke:#bbf7d0,color:#0a0a0a
-    class A root
-    class B sync
-    class C server
-    class D agent
+flowchart LR
+    A["📱 Onepilot"] -- "chat / cron" --> B[("🔄 Realtime sync")]
+    B -- "encrypted" --> C["🖥 Your server"]
+    C --> D["🤖 OpenClaw runtime"]
+    D -- "results" --> B
+    B -- "🔔 push" --> A
 ```
 
 Spin up an agent on your own server with a guided wizard. No YAML to edit, no Telegram bot to babysit. Talk to it directly from the app.
