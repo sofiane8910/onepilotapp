@@ -66,12 +66,22 @@ flowchart TB
 ## How agents work
 
 ```mermaid
-flowchart LR
-    A["📱 Onepilot"] -- "chat / cron" --> B[("🔄 Realtime sync")]
-    B -- "encrypted" --> C["🖥 Your server"]
-    C --> D["🤖 OpenClaw runtime"]
-    D -- "results" --> B
-    B -- "🔔 push" --> A
+flowchart TB
+    A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
+    A -- "chat &nbsp;·&nbsp; cron &nbsp;·&nbsp; run-now" --> B[("🔄 &nbsp;Realtime sync &nbsp;·&nbsp; encrypted&nbsp;")]
+    B -- "command" --> C["🖥 &nbsp;Your server &nbsp;(any VPS, Mac, Pi)&nbsp;"]
+    C --> D["🤖 &nbsp;OpenClaw agent runtime&nbsp;"]
+    D -- "result &nbsp;·&nbsp; logs" --> B
+    B -- "🔔 &nbsp;push notification" --> A
+
+    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
+    classDef sync fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
+    classDef server fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
+    classDef agent fill:#ffffff,stroke:#bbf7d0,color:#0a0a0a
+    class A root
+    class B sync
+    class C server
+    class D agent
 ```
 
 Spin up an agent on your own server with a guided wizard. No YAML to edit, no Telegram bot to babysit. Talk to it directly from the app.
@@ -89,11 +99,21 @@ The agent layer comes from the same observation: running an AI agent on your ser
 ## The repo: framework adapter pool
 
 ```mermaid
-flowchart LR
-    A["📱 Onepilot app"] -- pair server --> B["📦 plugins/&lt;framework&gt;/"]
-    B --> C["🤖 OpenClaw"]
-    B -.-> D["🧠 Hermes (next)"]
-    B -.-> E["🧷 Paperclip (next)"]
+flowchart TB
+    A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
+    A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT&nbsp;<br/><sub>plugins/&lt;framework&gt;/</sub>"]
+    B ==> C["🤖 &nbsp;OpenClaw &nbsp;·&nbsp; LIVE&nbsp;<br/><sub>chat &nbsp;·&nbsp; cron &nbsp;·&nbsp; multi-agent &nbsp;·&nbsp; push</sub>"]
+    B -.-> D["🧠 &nbsp;Hermes &nbsp;·&nbsp; next&nbsp;<br/><sub>persistent-memory chat &nbsp;·&nbsp; gateway mirror</sub>"]
+    B -.-> E["🧷 &nbsp;Paperclip &nbsp;·&nbsp; next&nbsp;<br/><sub>agent-company dashboard &nbsp;·&nbsp; budgets</sub>"]
+
+    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
+    classDef pool fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
+    classDef live fill:#ffffff,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
+    classDef next fill:#fafafa,stroke:#d4d4d4,color:#666
+    class A root
+    class B pool
+    class C live
+    class D,E next
 ```
 
 This repo is the **public plugin pool** that powers Onepilot's agent pillar. Every framework we integrate with ships its adapter here. When you pair a server in the app, the right adapter is fetched automatically.
