@@ -22,12 +22,6 @@ You get a real SSH terminal — and around it, the rest of the modern dev workfl
 
 > **One app. Two pillars. Your phone becomes the workstation.**
 
-<div align="center">
-
-### [→ Get Onepilot at onepilotapp.com](https://onepilotapp.com)
-
-</div>
-
 <br>
 
 ## What Onepilot is
