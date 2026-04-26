@@ -9,7 +9,7 @@
 [![iOS](https://img.shields.io/badge/iOS-15%2B-black.svg?style=flat-square&logo=apple)](https://onepilotapp.com)
 [![App Store](https://img.shields.io/badge/App%20Store-get-blue.svg?style=flat-square&logo=app-store&logoColor=white)](https://onepilotapp.com)
 [![Plugins: MIT](https://img.shields.io/badge/plugins-MIT-blue.svg?style=flat-square)](./LICENSE)
-[![Plugins live](https://img.shields.io/badge/plugins-1%20live%20%C2%B7%202%20next-brightgreen.svg?style=flat-square)](#supported-frameworks)
+[![Plugins live](https://img.shields.io/badge/plugins-2%20live%20%C2%B7%201%20next-brightgreen.svg?style=flat-square)](#supported-frameworks)
 [![Stars](https://img.shields.io/github/stars/sofiane8910/onepilotapp?style=flat-square)](https://github.com/sofiane8910/onepilotapp/stargazers)
 
 </div>
@@ -99,13 +99,13 @@ flowchart TB
     A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
     A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT&nbsp;<br/><sub>plugins/&lt;framework&gt;/</sub>"]
     B ==> C["<b>🦀 &nbsp;OpenClaw</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
-    B -.-> D["<b>⚔️ &nbsp;Hermes</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
+    B ==> D["<b>⚔️ &nbsp;Hermes</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
     B -.-> E["<b>🧷 &nbsp;Paperclip</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
 
     classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
     classDef pool fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
     classDef openclaw fill:#fff7ed,stroke:#fb923c,color:#0a0a0a,font-weight:bold
-    classDef hermes fill:#f0fdf4,stroke:#14532d,color:#0a0a0a
+    classDef hermes fill:#f0fdf4,stroke:#14532d,color:#0a0a0a,font-weight:bold
     classDef paperclip fill:#fafafa,stroke:#d4d4d4,color:#666
     class A root
     class B pool
@@ -125,7 +125,7 @@ This repo is the **public plugin pool** that powers Onepilot's agent pillar. Eve
 | Framework | Plugin | Status | What it adds to Onepilot |
 |---|---|---|---|
 | <img src="docs/img/openclaw-logo.png" width="28" align="left"/> &nbsp;[**OpenClaw**](https://github.com/openclaw/openclaw) | [`openclaw/onepilot-channel`](./plugins/openclaw/onepilot-channel) | ✅ **Live** | Chat, cron, multi-agent, push alerts |
-| <img src="docs/img/hermes-logo.png" width="28" align="left"/> &nbsp;[**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | 🚧 Next | Persistent-memory chat, multi-channel gateway mirror |
+| <img src="docs/img/hermes-logo.png" width="28" align="left"/> &nbsp;[**Hermes Agent**](https://hermes-agent.nousresearch.com/) | [`hermes/*`](./plugins/hermes) | ✅ **Live** | Persistent-memory chat, multi-channel gateway mirror |
 | <img src="docs/img/paperclip-logo.png" width="28" align="left"/> &nbsp;[**Paperclip**](https://github.com/paperclipai/paperclip) | [`paperclip/*`](./plugins/paperclip) | 🚧 Next | Agent-company dashboard, budgets, org chart on mobile |
 
 Want another framework? [Open an issue](https://github.com/sofiane8910/onepilotapp/issues/new).
