@@ -107,6 +107,14 @@ export async function handleUserMessage(params) {
   const agentId = getAgentId();
   const peerId = String(account.userId).trim().toLowerCase();
   const peerSessionKey = `agent:${agentId}:onepilot:direct:${peerId}`;
+  // We use stream:true even though the user-visible UX is single-row:
+  // delivery to Supabase happens once at the end. The reason for streaming
+  // here is connection durability — tokens flow regularly (every few hundred
+  // ms), so any idle timeout in the gateway, the upstream LLM, or Node's
+  // fetch client never trips. With stream:false a long-running think (e.g.
+  // a 1-hour agent task) can be killed by an idle timeout somewhere in the
+  // chain; the reply is then genuinely lost, no retry recovers it.
+  // Locally we just accumulate deltas and post once at stream close.
   let reply;
   try {
     const res = await fetch(`http://127.0.0.1:${gatewayPort}/v1/chat/completions`, {
@@ -118,11 +126,12 @@ export async function handleUserMessage(params) {
         "x-openclaw-account-id": accountId,
         "x-openclaw-message-to": userMessageRow.session_key ?? account.sessionKey,
         "x-openclaw-session-key": peerSessionKey,
+        "Accept": "text/event-stream",
       },
       body: JSON.stringify({
         model: "openclaw", // gateway ignores; uses its configured default
         messages,
-        stream: false,
+        stream: true,
       }),
     });
     if (!res.ok) {
@@ -130,8 +139,7 @@ export async function handleUserMessage(params) {
       log(`gateway /v1/chat/completions returned ${res.status}: ${body.slice(0, 200)}`);
       return;
     }
-    const completion = await res.json();
-    reply = extractAssistantText(completion);
+    reply = await readSseAssistantText(res, log);
   } catch (err) {
     log(`gateway call failed`, err);
     return;
@@ -162,12 +170,85 @@ export async function handleUserMessage(params) {
     const deliverRes = await postIngestWithRetry(url, account.agentKey, deliverBody, log);
     if (!deliverRes.ok) {
       const body = await deliverRes.text();
-      log(`message POST returned ${deliverRes.status}: ${body.slice(0, 200)}`);
+      log(`message POST returned ${deliverRes.status} after retries: ${body.slice(0, 200)} — sending user-visible fallback`);
+      await sendDeliveryFailureNotice({
+        url,
+        agentKey: account.agentKey,
+        userIdLc,
+        agentProfileIdLc,
+        sessionKey: userMessageRow.session_key ?? account.sessionKey,
+        log,
+      });
       return;
     }
     log(`assistant reply delivered (${reply.length} chars)`);
   } catch (err) {
     log(`message POST failed`, err);
+    // Best-effort: tell the user their message wasn't answered. If this also
+    // fails the user just won't see anything (same as before this change).
+    try {
+      const userIdLc = String(account.userId).toLowerCase();
+      const agentProfileIdLc = String(account.agentProfileId).toLowerCase();
+      const url = `${account.backendUrl}/functions/v1/agent-message-ingest`;
+      await sendDeliveryFailureNotice({
+        url,
+        agentKey: account.agentKey,
+        userIdLc,
+        agentProfileIdLc,
+        sessionKey: userMessageRow.session_key ?? account.sessionKey,
+        log,
+      });
+    } catch (notifyErr) {
+      log(`fallback notice also failed`, notifyErr);
+    }
+  }
+}
+
+// Posts a user-visible assistant message saying delivery failed so the user
+// knows to retry instead of staring at silence. Short retry budget — if the
+// main path already burned ~60s and failed, the backend is genuinely down
+// and we don't want to tie up the gateway any longer.
+async function sendDeliveryFailureNotice({ url, agentKey, userIdLc, agentProfileIdLc, sessionKey, log }) {
+  const noticeBody = JSON.stringify({
+    userId: userIdLc,
+    agentProfileId: agentProfileIdLc,
+    sessionKey,
+    role: "assistant",
+    content: [{
+      type: "text",
+      text: "⚠ I generated a reply but couldn't reach the server to deliver it. Please send your message again.",
+    }],
+    timestamp: Date.now(),
+  });
+  const delays = [500, 1500];
+  let lastRes;
+  for (let attempt = 0; attempt <= delays.length; attempt++) {
+    try {
+      lastRes = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${agentKey}`,
+        },
+        body: noticeBody,
+      });
+    } catch (err) {
+      if (attempt === delays.length) {
+        log(`fallback notice network error, giving up: ${err?.message ?? err}`);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, delays[attempt]));
+      continue;
+    }
+    if (lastRes.ok) {
+      log(`fallback notice delivered to user`);
+      return;
+    }
+    if (lastRes.status < 500 || attempt === delays.length) {
+      log(`fallback notice failed: ${lastRes.status} (final)`);
+      return;
+    }
+    await new Promise((r) => setTimeout(r, delays[attempt]));
   }
 }
 
@@ -215,8 +296,44 @@ function extractText(content) {
   return "";
 }
 
+// Drain an OpenAI-compatible SSE stream from /v1/chat/completions, return
+// the accumulated assistant text. We intentionally don't surface partial
+// content to Supabase — see the streaming-rationale comment in
+// handleUserMessage; this is purely about keeping the HTTP socket alive
+// across long thinks.
+async function readSseAssistantText(res, log) {
+  const decoder = new TextDecoder();
+  let buf = "";
+  let acc = "";
+  for await (const chunk of res.body) {
+    buf += decoder.decode(chunk, { stream: true });
+    let idx;
+    while ((idx = buf.indexOf("\n")) >= 0) {
+      const line = buf.slice(0, idx).trim();
+      buf = buf.slice(idx + 1);
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      try {
+        const j = JSON.parse(payload);
+        const delta = j?.choices?.[0]?.delta?.content;
+        if (typeof delta === "string") acc += delta;
+      } catch (err) {
+        log(`sse parse error (skipping line): ${err?.message ?? err}`);
+      }
+    }
+  }
+  return acc;
+}
+
 async function postIngestWithRetry(url, agentKey, body, log) {
-  const delays = [250, 750];
+  // Buffer against transient backend/network problems: Supabase Edge Runtime
+  // worker boot/recycle (typically 2–5s), brief connectivity drops on the
+  // host, or short upstream incidents. ~60s total budget across 8 attempts
+  // with exponential backoff. If we still can't deliver after this, the
+  // caller posts a user-visible fallback notice (sendDeliveryFailureNotice)
+  // so the user knows to retry rather than wait forever.
+  const delays = [500, 1000, 2000, 4000, 8000, 15000, 30000];
   let lastRes;
   for (let attempt = 0; attempt <= delays.length; attempt++) {
     try {
@@ -241,18 +358,3 @@ async function postIngestWithRetry(url, agentKey, body, log) {
   return lastRes;
 }
 
-function extractAssistantText(completion) {
-  if (!completion) return "";
-  const choice = completion.choices?.[0];
-  if (!choice) return "";
-  const msg = choice.message;
-  if (!msg) return "";
-  if (typeof msg.content === "string") return msg.content;
-  if (Array.isArray(msg.content)) {
-    const textPart = msg.content.find(
-      (p) => p && typeof p === "object" && (p.type === "text" || !p.type) && typeof p.text === "string",
-    );
-    return textPart?.text ?? "";
-  }
-  return "";
-}

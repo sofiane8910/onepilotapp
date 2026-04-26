@@ -1,6 +1,6 @@
 {
   "name": "openclaw-onepilot-channel",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "OpenClaw channel plugin that bridges Onepilot messages to the agent runtime",
   "type": "module",
   "main": "./src/index.js",

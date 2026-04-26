@@ -57,7 +57,9 @@ export async function sendOnepilotText({ ctx, accounts, log }) {
 
   // Retry on Supabase Edge Runtime transient 5xx (mostly 503 with null
   // function_id — runtime worker boot/recycle, not our function failing).
-  // 3 attempts, 250/750ms backoff.
+  // ~60s total budget across 8 attempts with exponential backoff, so we
+  // ride out worker recycles, brief network drops, and short upstream
+  // incidents without dropping the message.
   const res = await postWithRetry(url, account.agentKey, body, log);
 
   if (!res.ok) {
@@ -71,7 +73,7 @@ export async function sendOnepilotText({ ctx, accounts, log }) {
 }
 
 async function postWithRetry(url, agentKey, body, log) {
-  const delays = [250, 750];
+  const delays = [500, 1000, 2000, 4000, 8000, 15000, 30000];
   let lastRes;
   for (let attempt = 0; attempt <= delays.length; attempt++) {
     try {
