@@ -31,6 +31,42 @@ const _activeSubscriptions = new Map();
 // gateway process, regardless of how many times `register` is invoked.
 let _channelRegistered = false;
 
+// Fetch recent user rows for the bound (userId, agentProfileId) and
+// dispatch any newer than `sinceMs`. handleUserMessage's per-session
+// dedupe drops anything that already has a newer assistant reply, so
+// rerunning catch-up is idempotent.
+async function runCatchUp({ account, agentProfileIdLc, sinceMs, log, dispatch }) {
+  try {
+    const url = `${account.backendUrl}/functions/v1/agent-message-history?mode=recent-user&minutes=10&limit=20`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${account.agentKey}` },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      log(`history fetch failed: ${res.status} ${body.slice(0, 200)}`);
+      return;
+    }
+    const json = await res.json();
+    const rows = Array.isArray(json?.messages) ? json.messages : [];
+    let dispatched = 0;
+    for (const row of rows) {
+      if (
+        agentProfileIdLc &&
+        row.agent_profile_id &&
+        String(row.agent_profile_id).toLowerCase() !== agentProfileIdLc
+      ) continue;
+      const ts = row.created_at ? Date.parse(row.created_at) : 0;
+      if (!Number.isFinite(ts) || ts <= sinceMs) continue;
+      dispatch(row);
+      dispatched++;
+    }
+    if (dispatched > 0) log(`recovered ${dispatched} missed message(s) on (re)subscribe`);
+  } catch (err) {
+    log(`catch-up failed`, err);
+  }
+}
+
 export default definePluginEntry({
   id: "onepilot",
   name: "Onepilot",
@@ -147,6 +183,14 @@ export default definePluginEntry({
       const userIdLc = String(account.userId).toLowerCase();
       const agentProfileIdLc = String(account.agentProfileId).toLowerCase();
 
+      // Catch-up state: the highest user-message timestamp we've already
+      // dispatched. On every successful channel (re)subscribe we ask the
+      // backend for user rows newer than this — recovers messages that
+      // landed during a Realtime socket gap (broadcast-only, no replay).
+      // First catch-up uses a 10-minute lookback window.
+      let lastSeenUserAt = 0;
+      const catchUpInFlight = { value: false };
+
       const sub = startStreamSubscription({
         accountId,
         backendUrl: account.backendUrl,
@@ -174,6 +218,8 @@ export default definePluginEntry({
           ) {
             return;
           }
+          const ts = row.created_at ? Date.parse(row.created_at) : 0;
+          if (Number.isFinite(ts) && ts > lastSeenUserAt) lastSeenUserAt = ts;
           log(
             `[${accountId}] user message id=${String(row.id ?? "").slice(0, 8)} ` +
               `session=${row.session_key ?? "?"} — dispatching to agent`,
@@ -190,6 +236,37 @@ export default definePluginEntry({
               else api.logger.info?.(`[onepilot:${accountId}:dispatch] ${m}`);
             },
           });
+        },
+        onSubscribed: () => {
+          // Fire-and-forget catch-up. Skips if one is already running so
+          // back-to-back reconnects don't pile up.
+          if (catchUpInFlight.value) return;
+          catchUpInFlight.value = true;
+          void runCatchUp({
+            account,
+            agentProfileIdLc,
+            sinceMs: lastSeenUserAt,
+            log: (m, err) => {
+              if (err) api.logger.warn?.(`[onepilot:${accountId}:catchup] ${m}: ${String(err)}`);
+              else api.logger.info?.(`[onepilot:${accountId}:catchup] ${m}`);
+            },
+            dispatch: (row) => {
+              const ts = row.created_at ? Date.parse(row.created_at) : 0;
+              if (Number.isFinite(ts) && ts > lastSeenUserAt) lastSeenUserAt = ts;
+              void handleUserMessage({
+                api,
+                accountId,
+                account,
+                userMessageRow: row,
+                gatewayPort,
+                gatewayToken,
+                log: (m, err) => {
+                  if (err) api.logger.warn?.(`[onepilot:${accountId}:dispatch] ${m}: ${String(err)}`);
+                  else api.logger.info?.(`[onepilot:${accountId}:dispatch] ${m}`);
+                },
+              });
+            },
+          }).finally(() => { catchUpInFlight.value = false; });
         },
         log: (m, err) => {
           if (err) api.logger.warn?.(`[onepilot:${accountId}:stream] ${m}: ${String(err)}`);

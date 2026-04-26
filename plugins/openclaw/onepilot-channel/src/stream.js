@@ -28,6 +28,7 @@ import { RawWebSocket } from "./ws-raw.js";
  * @property {(token: string) => void} [onAuthToken]
  * @property {(msg: string, err?: unknown) => void} [log]
  * @property {(info: { reason: string }) => void} [onTerminal] called once on unrecoverable auth failure (revoked key)
+ * @property {() => void} [onSubscribed] fired after every successful channel join (initial + every reconnect). Use it to catch up on messages that may have landed during the socket gap — Realtime is broadcast-only and does not replay missed inserts.
  */
 
 async function fetchStreamToken(config) {
@@ -76,6 +77,7 @@ export function startStreamSubscription(config) {
   let refCounter = 1;
   let stopped = false;
   let currentBackoffMs = 1000;
+  let pendingJoinRef = null;
 
   async function renewAuthToken() {
     const { token, expiresAt } = await fetchStreamToken(config);
@@ -199,6 +201,7 @@ export function startStreamSubscription(config) {
 
       const topic = `${WIRE_TOPIC_PREFIX}${config.schema}:${config.table}`;
       const joinRef = String(refCounter++);
+      pendingJoinRef = joinRef;
       const joinPayload = {
         config: {
           broadcast: { self: false },
@@ -242,6 +245,15 @@ export function startStreamSubscription(config) {
         }
       } else if (frame.event === "phx_reply" && frame.payload?.status === "error") {
         log(`phx_reply error: ${JSON.stringify(frame.payload)}`);
+      } else if (
+        frame.event === "phx_reply" &&
+        frame.payload?.status === "ok" &&
+        pendingJoinRef !== null &&
+        String(frame.ref) === pendingJoinRef
+      ) {
+        pendingJoinRef = null;
+        log("channel joined — running catch-up");
+        try { config.onSubscribed?.(); } catch (err) { log("onSubscribed handler threw", err); }
       } else if (frame.event === "system" && frame.payload?.status === "error") {
         log(`system error: ${JSON.stringify(frame.payload)}`);
         const msg = String(frame.payload?.message ?? "");
