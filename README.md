@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="docs/img/onepilot-logo.png" alt="Onepilot" width="160"/>
-
-# Onepilot
+<img src="docs/img/onepilot-banner.png" alt="Onepilot — your servers, in your pocket. iOS app for SSH and AI agent ops." width="900"/>
 
 ### The mobile terminal for modern developers — with an AI agent layer built in.
 
