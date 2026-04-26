@@ -18,7 +18,7 @@
 
 **Termius and Blink are great SSH clients.** Onepilot is a different shape: a mobile dev environment with an AI agent layer on top.
 
-You get a real SSH terminal — and around it, the rest of the modern dev workflow on mobile: live file editing on the remote box, in-app localhost preview, GitHub PRs and Actions, cron monitoring, a directory picker. Then a second pillar on top: a one-tap AI agent ops layer so you can spin up an agent on your server in under a minute and chat with it from your phone.
+You get a real SSH terminal — and around it, the rest of the modern dev workflow on mobile: a remote directory browser, file reader, and editor, in-app localhost preview, GitHub PRs and Actions, cron monitoring. Then a second pillar on top: a one-tap AI agent ops layer so you can spin up an agent on your server in under a minute and chat with it from your phone.
 
 > **One app. Two pillars. Your phone becomes the workstation.**
 
@@ -40,10 +40,10 @@ flowchart TB
     P ==> A["&nbsp;✦ &nbsp;&nbsp;PILLAR 2 &nbsp;&nbsp;·&nbsp;&nbsp; AI agent ops&nbsp;"]
 
     T --> T1["Real SSH &nbsp;·&nbsp; mosh &nbsp;·&nbsp; port forward"]
-    T1 --> T2["Live file edit on the remote box"]
+    T1 --> T2["Directory browser &nbsp;·&nbsp; file reader &nbsp;·&nbsp; editor"]
     T2 --> T3["localhost preview in-app browser"]
     T3 --> T4["GitHub PRs &nbsp;·&nbsp; repos &nbsp;·&nbsp; Actions"]
-    T4 --> T5["Cron monitor &nbsp;·&nbsp; directory picker"]
+    T4 --> T5["Cron monitor"]
 
     A --> A1["Deploy an agent in &lt; 60 seconds"]
     A1 --> A2["Chat with your agents from your phone"]
