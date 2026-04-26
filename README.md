@@ -176,6 +176,4 @@ CI picks up the tag, packs the right subdirectory, and uploads the tarball as a 
 
 **[onepilotapp.com](https://onepilotapp.com)**  ·  [Star ⭐](https://github.com/sofiane8910/onepilotapp/stargazers)  ·  [Issues](https://github.com/sofiane8910/onepilotapp/issues)
 
-<sub>Made for developers who do real work from their phone.</sub>
-
 </div>
