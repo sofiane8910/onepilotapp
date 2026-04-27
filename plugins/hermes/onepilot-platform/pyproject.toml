@@ -1,6 +1,6 @@
 [project]
 name = "hermes-onepilot-platform"
-version = "0.1.0"
+version = "0.2.0"
 description = "Onepilot channel plugin for the Hermes agent framework. Bridges Onepilot app messages to a running Hermes gateway and posts assistant replies back so the app can deliver them as push notifications."
 authors = [{ name = "Onepilot" }]
 license = { text = "MIT" }

@@ -1,6 +1,6 @@
 name: onepilot
-version: 0.1.0
-description: Bridges Onepilot messages to this Hermes agent. Subscribes to the inbound channel for user prompts and posts assistant replies back so the Onepilot app can deliver them as push notifications, even when the app is closed.
+version: 0.2.0
+description: Bridges Onepilot messages to this Hermes agent. Subscribes to the inbound channel for user prompts, posts assistant replies back so the Onepilot app can deliver them as push notifications, and registers `onepilot` as a cron delivery channel so scheduled jobs land in the same chat.
 author: Onepilot
 kind: standalone
 requires_env: []

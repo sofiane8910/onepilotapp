@@ -10,6 +10,14 @@ The plugin spawns one long-running asyncio task that:
 3. Posts the reply to the backend message endpoint, which inserts it and
    delivers a push notification to the user's devices.
 
+It also installs a synchronous cron-delivery channel by patching
+`cron.scheduler` so jobs created with `--deliver onepilot[:<sessionKey>]`
+route their output to the same backend ingest endpoint. Hermes has no
+public channel-registry API (PluginContext only exposes tools, hooks,
+CLI commands), and the cron scheduler hardcodes its known platforms in
+a frozenset; we extend that set and wrap `_deliver_result` at register
+time so cron output flows through the same ingest path as live chat.
+
 Auth: a durable per-agent API key (server-bound to one user+agent pair),
 exchanged on demand for short-lived stream JWTs. Config lives next to this
 file as `config.json`, written by the Onepilot deploy step.
@@ -28,7 +36,7 @@ import logging
 import os
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 logger = logging.getLogger("hermes_plugins.onepilot")
 
@@ -40,6 +48,11 @@ HISTORY_LIMIT = 20
 # Phoenix wire-protocol literals. Public identifiers, not secrets.
 _WIRE_TOPIC_PREFIX = "realtime:"
 _WIRE_EVENT_CHANGES = "postgres_changes"
+
+# Cron-channel patch sentinel. Hermes can call register() more than once
+# in long-lived processes (plugin reload during dev); the install function
+# is a no-op after the first successful call.
+_CRON_PATCHED = False
 
 
 class _TerminalAuthError(Exception):
@@ -77,20 +90,216 @@ def register(ctx) -> None:
         logger.info("[onepilot] plugin disabled in config")
         return
 
-    # Schedule the long-running task on whatever event loop is current. If
-    # `register()` runs before the loop is started (Hermes loads plugins at
-    # gateway init, before run()), `create_task` will queue the coroutine
-    # for the next time the loop runs — which is what we want.
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
+    # Install the cron-delivery channel BEFORE spawning the inbound thread.
+    # Hermes loads plugins during gateway init, before the cron tick thread
+    # exists, so any patch installed here is visible the first time a cron
+    # fires. If the install fails (Hermes internals moved), cron jobs sent
+    # to deliver=onepilot will surface the failure on the job's last_error
+    # field — visible in the iOS cron UI — instead of silently disappearing.
+    _install_cron_channel(config)
+
+    # The plugin's lifecycle is independent of Hermes' event loop — it talks
+    # to the backend realtime stream over a websocket and posts back to Hermes' local
+    # HTTP API server (http://127.0.0.1:<API_SERVER_PORT>), not to Hermes
+    # internals. We previously did `asyncio.get_event_loop().create_task(...)`
+    # but on Python 3.11+ that returns a throwaway loop because Hermes calls
+    # `register()` BEFORE its gateway loop starts. The task got GC'd as
+    # "Task was destroyed but it is pending! coroutine '_run' was never
+    # awaited", so messages sent from the iOS app went into a black hole.
+    # Fix: spawn a dedicated daemon thread with its own asyncio loop. The
+    # thread exits with the gateway process.
+    import threading
+
+    def _thread_main() -> None:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-    loop.create_task(_run(config))
+        try:
+            loop.run_until_complete(_run(config))
+        except Exception as exc:  # pragma: no cover — surface via logs
+            logger.error("[onepilot] plugin thread crashed: %s", exc)
+        finally:
+            loop.close()
+
+    threading.Thread(
+        target=_thread_main,
+        name="onepilot-plugin",
+        daemon=True,
+    ).start()
 
     user_short = str(config["userId"])[:8]
     agent_short = str(config["agentProfileId"])[:8]
     logger.info("[onepilot] plugin scheduled (user=%s agent=%s)", user_short, agent_short)
+
+
+def _install_cron_channel(config: dict[str, Any]) -> None:
+    """Register `onepilot` as a cron delivery channel by patching cron.scheduler.
+
+    Hermes' cron scheduler validates the deliver target against
+    `_KNOWN_DELIVERY_PLATFORMS` (a frozenset) and dispatches via
+    `_deliver_result`. Both are module-level attributes; the production call
+    site at `cron/scheduler.py:_process_job` looks `_deliver_result` up by
+    module attribute on each tick, so rebinding it from here is picked up.
+
+    The wrapper is targeted: anything whose deliver string does not name
+    `onepilot` is delegated to the original implementation untouched.
+    Telegram/Slack/Matrix etc. continue to dispatch through Hermes' built-in
+    adapter map.
+
+    Failure modes:
+      * `cron.scheduler` import fails → log once and return; cron behaves
+        as it does today (jobs sent to onepilot fail at fire time with
+        Hermes' built-in "unknown platform" error, surfaced in last_error).
+      * Required symbols missing (Hermes upgrade renamed something) →
+        log once and return; same fallback behavior as above.
+    """
+    global _CRON_PATCHED
+    if _CRON_PATCHED:
+        return
+    try:
+        import cron.scheduler as _sched
+    except Exception as exc:
+        logger.warning(
+            "[onepilot] cron.scheduler import failed (%s); cron channel disabled", exc
+        )
+        return
+
+    if not hasattr(_sched, "_KNOWN_DELIVERY_PLATFORMS") or not hasattr(
+        _sched, "_deliver_result"
+    ):
+        logger.warning(
+            "[onepilot] hermes cron internals changed; cron channel disabled"
+        )
+        return
+
+    try:
+        _sched._KNOWN_DELIVERY_PLATFORMS = _sched._KNOWN_DELIVERY_PLATFORMS | frozenset(
+            {"onepilot"}
+        )
+    except Exception as exc:
+        logger.warning(
+            "[onepilot] failed to extend _KNOWN_DELIVERY_PLATFORMS (%s); cron channel disabled",
+            exc,
+        )
+        return
+
+    _orig_deliver = _sched._deliver_result
+
+    def _patched(job, content, adapters=None, loop=None):
+        # Cron's `deliver` field is a comma-separated list of platform[:dest]
+        # entries (scheduler.py:_resolve_delivery_targets). We only intercept
+        # if onepilot appears as one of the platforms; everything else
+        # continues to flow through the original dispatcher.
+        deliver = str(job.get("deliver", "") or "")
+        platform_names = [
+            part.strip().split(":", 1)[0]
+            for part in deliver.split(",")
+            if part.strip()
+        ]
+        if "onepilot" not in platform_names:
+            return _orig_deliver(job, content, adapters=adapters, loop=loop)
+
+        # Hermes' silent-marker convention: agent prefixes output with [SILENT]
+        # to skip delivery while still saving locally.
+        if content and content.lstrip().startswith("[SILENT]"):
+            return None
+
+        try:
+            err = _onepilot_deliver_sync(job, content, config)
+        except Exception as exc:
+            err = f"onepilot delivery failed: {exc}"
+        if err:
+            logger.warning("[onepilot] cron %s delivery failed: %s", job.get("id", "?"), err)
+        return err
+
+    _sched._deliver_result = _patched
+    _CRON_PATCHED = True
+    logger.info("[onepilot] cron delivery channel installed")
+
+
+def _onepilot_deliver_sync(job: dict, content: str, config: dict[str, Any]) -> Optional[str]:
+    """Drive the async ingest call from the synchronous cron-tick thread.
+
+    Mirrors the dual-path strategy Hermes itself uses for standalone
+    delivery (cron/scheduler.py): run a fresh event loop in the current
+    thread, or fall back to a worker thread if one is already running.
+    Returns None on success or an error string the scheduler stores in
+    `last_error` so the iOS UI can surface it.
+    """
+    import concurrent.futures
+
+    coro = _onepilot_deliver(job, content, config)
+    try:
+        return asyncio.run(coro)
+    except RuntimeError:
+        # asyncio.run refuses if a loop is already running in this thread.
+        coro.close()
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            future = pool.submit(asyncio.run, _onepilot_deliver(job, content, config))
+            return future.result(timeout=120)
+
+
+async def _onepilot_deliver(
+    job: dict, content: str, config: dict[str, Any]
+) -> Optional[str]:
+    """POST cron output to agent-message-ingest as an assistant message.
+
+    Resolves the destination session from the deliver string
+    (`onepilot:<sessionKey>`), or falls back to the config's default
+    session — Onepilot's one-agent-one-thread model means the default
+    is almost always correct. Reuses the same retry curve as the inbound
+    chat path because it hits the same endpoint with the same auth.
+    """
+    import httpx
+
+    deliver = str(job.get("deliver", "") or "")
+    session_key = config["sessionKey"]
+    for part in deliver.split(","):
+        part = part.strip()
+        if part.startswith("onepilot:"):
+            tail = part.split(":", 1)[1].strip()
+            if tail:
+                session_key = tail
+            break
+
+    job_name = str(job.get("name") or job.get("id") or "").strip()
+    text = content or ""
+    if job_name:
+        text = f"**{job_name}**\n\n{text}"
+
+    body = {
+        "userId": str(config["userId"]).lower(),
+        "agentProfileId": str(config["agentProfileId"]).lower(),
+        "sessionKey": session_key,
+        "role": "assistant",
+        "content": [{"type": "text", "text": text}],
+        "timestamp": int(time.time() * 1000),
+    }
+    url = f"{config['backendUrl']}/functions/v1/agent-message-ingest"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {config['agentKey']}",
+    }
+    body_str = json.dumps(body)
+
+    delays = [0.25, 0.75]  # transient 5xx retry curve, matches _handle_user_message
+    for attempt in range(len(delays) + 1):
+        try:
+            async with httpx.AsyncClient(timeout=20) as client:
+                r = await client.post(url, headers=headers, content=body_str)
+            if r.status_code == 200:
+                logger.info(
+                    "[onepilot] cron '%s' delivered (%d chars)",
+                    job.get("id", "?"),
+                    len(text),
+                )
+                return None
+            if r.status_code < 500 or attempt == len(delays):
+                return f"ingest {r.status_code}: {r.text[:200]}"
+        except Exception as exc:
+            if attempt == len(delays):
+                return f"ingest network error: {exc}"
+        await asyncio.sleep(delays[attempt])
+    return "ingest exhausted retries"
 
 
 async def _run(config: dict[str, Any]) -> None:
