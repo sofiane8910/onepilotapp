@@ -2,10 +2,17 @@ name: Release plugin tarball
 
 # Triggered by tags of the form:
 #     <framework>/<plugin>@v<semver>
-# e.g. openclaw/onepilot-channel@v0.2.11
+# e.g. openclaw/onepilot-channel@v0.2.11, hermes/onepilot-platform@v0.2.0
 #
 # The workflow parses the tag, packs the matching plugins/<framework>/<plugin>
 # subdirectory, and uploads the tarball as the release asset for that tag.
+# Two pack flavors are supported, picked by which marker file the plugin
+# directory contains:
+#   * package.json    → `npm pack` (Node plugin, e.g. openclaw/onepilot-channel)
+#   * pyproject.toml  → `tar -czf` with a `package/` prefix to match the
+#                       layout `npm pack` produces (Python plugin, e.g.
+#                       hermes/onepilot-platform). Uniform layout means iOS
+#                       extracts both flavors with `tar -xzf --strip-components=1`.
 
 on:
   push:
@@ -35,8 +42,12 @@ jobs:
             echo "::error::tag references $DIR but directory does not exist"
             exit 1
           fi
-          if [ ! -f "$DIR/package.json" ]; then
-            echo "::error::$DIR has no package.json — cannot pack"
+          if [ -f "$DIR/package.json" ]; then
+            KIND=npm
+          elif [ -f "$DIR/pyproject.toml" ]; then
+            KIND=python
+          else
+            echo "::error::$DIR has neither package.json nor pyproject.toml — cannot determine pack kind"
             exit 1
           fi
           echo "tag=$TAG"               >> "$GITHUB_OUTPUT"
@@ -44,15 +55,40 @@ jobs:
           echo "plugin=$PLUGIN"         >> "$GITHUB_OUTPUT"
           echo "version=$VERSION"       >> "$GITHUB_OUTPUT"
           echo "dir=$DIR"               >> "$GITHUB_OUTPUT"
+          echo "kind=$KIND"             >> "$GITHUB_OUTPUT"
 
       - name: Pack plugin
         id: pack
         working-directory: ${{ steps.parse.outputs.dir }}
         run: |
-          npm pack --silent
-          ORIG=$(ls *.tgz | head -1)
           OUT="${{ steps.parse.outputs.plugin }}-${{ steps.parse.outputs.version }}.tgz"
-          mv "$ORIG" "$OUT"
+          case "${{ steps.parse.outputs.kind }}" in
+            npm)
+              npm pack --silent
+              ORIG=$(ls *.tgz | head -1)
+              mv "$ORIG" "$OUT"
+              ;;
+            python)
+              # Mirror `npm pack`'s top-level `package/` prefix so iOS can
+              # use `tar -xzf --strip-components=1` uniformly across plugin
+              # kinds. Drop dev artifacts that have no business shipping.
+              tar -czf "$OUT" \
+                --transform 's,^\./,package/,' \
+                --exclude='./'"$OUT" \
+                --exclude='./__pycache__' \
+                --exclude='./*.pyc' \
+                --exclude='./.venv' \
+                --exclude='./build' \
+                --exclude='./dist' \
+                --exclude='./*.egg-info' \
+                --exclude='./config.json' \
+                .
+              ;;
+            *)
+              echo "::error::unknown pack kind '${{ steps.parse.outputs.kind }}'"
+              exit 1
+              ;;
+          esac
           SHA=$(sha256sum "$OUT" | awk '{print $1}')
           echo "tarball=$OUT"             >> "$GITHUB_OUTPUT"
           echo "path=$PWD/$OUT"           >> "$GITHUB_OUTPUT"
@@ -66,7 +102,7 @@ jobs:
           body: |
             **${{ steps.parse.outputs.framework }} · ${{ steps.parse.outputs.plugin }} · ${{ steps.parse.outputs.version }}**
 
-            Built from `${{ steps.parse.outputs.dir }}`.
+            Built from `${{ steps.parse.outputs.dir }}` (${{ steps.parse.outputs.kind }} pack).
 
             ## Integrity
             ```
