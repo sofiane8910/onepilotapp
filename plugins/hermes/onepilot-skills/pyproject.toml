@@ -1,0 +1,9 @@
+[project]
+name = "hermes-onepilot-skills"
+version = "0.1.0"
+description = "Read-only skill discovery surface for the Onepilot iOS app."
+authors = [{ name = "Onepilot" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []

@@ -1,0 +1,120 @@
+name: Release plugin tarball
+
+# Triggered by tags of the form:
+#     <framework>/<plugin>@v<semver>
+# e.g. openclaw/onepilot-channel@v0.2.11, hermes/onepilot-platform@v0.2.0
+#
+# The workflow parses the tag, packs the matching plugins/<framework>/<plugin>
+# subdirectory, and uploads the tarball as the release asset for that tag.
+# Two pack flavors are supported, picked by which marker file the plugin
+# directory contains:
+#   * package.json    → `npm pack` (Node plugin, e.g. openclaw/onepilot-channel)
+#   * pyproject.toml  → `tar -czf` with a `package/` prefix to match the
+#                       layout `npm pack` produces (Python plugin, e.g.
+#                       hermes/onepilot-platform). Uniform layout means iOS
+#                       extracts both flavors with `tar -xzf --strip-components=1`.
+
+on:
+  push:
+    tags:
+      - "*/*@v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse tag
+        id: parse
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          # <framework>/<plugin>@vX.Y.Z
+          FRAMEWORK="${TAG%%/*}"
+          REST="${TAG#*/}"
+          PLUGIN="${REST%@*}"
+          VERSION="${REST#*@}"
+          DIR="plugins/${FRAMEWORK}/${PLUGIN}"
+          if [ ! -d "$DIR" ]; then
+            echo "::error::tag references $DIR but directory does not exist"
+            exit 1
+          fi
+          if [ -f "$DIR/package.json" ]; then
+            KIND=npm
+          elif [ -f "$DIR/pyproject.toml" ]; then
+            KIND=python
+          else
+            echo "::error::$DIR has neither package.json nor pyproject.toml — cannot determine pack kind"
+            exit 1
+          fi
+          echo "tag=$TAG"               >> "$GITHUB_OUTPUT"
+          echo "framework=$FRAMEWORK"   >> "$GITHUB_OUTPUT"
+          echo "plugin=$PLUGIN"         >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"       >> "$GITHUB_OUTPUT"
+          echo "dir=$DIR"               >> "$GITHUB_OUTPUT"
+          echo "kind=$KIND"             >> "$GITHUB_OUTPUT"
+
+      - name: Pack plugin
+        id: pack
+        working-directory: ${{ steps.parse.outputs.dir }}
+        run: |
+          OUT="${{ steps.parse.outputs.plugin }}-${{ steps.parse.outputs.version }}.tgz"
+          case "${{ steps.parse.outputs.kind }}" in
+            npm)
+              npm pack --silent
+              ORIG=$(ls *.tgz | head -1)
+              mv "$ORIG" "$OUT"
+              ;;
+            python)
+              # Mirror `npm pack`'s top-level `package/` prefix so iOS can
+              # use `tar -xzf --strip-components=1` uniformly across plugin
+              # kinds. Drop dev artifacts that have no business shipping.
+              # Write the tarball under /tmp first — writing it into `.`
+              # while tarring `.` makes GNU tar bail with
+              # "file changed as we read it".
+              TMP_OUT="$(mktemp -u --suffix=.tgz)"
+              tar -czf "$TMP_OUT" \
+                --transform 's,^\./,package/,' \
+                --exclude='./__pycache__' \
+                --exclude='./*.pyc' \
+                --exclude='./.venv' \
+                --exclude='./build' \
+                --exclude='./dist' \
+                --exclude='./*.egg-info' \
+                --exclude='./config.json' \
+                .
+              mv "$TMP_OUT" "$OUT"
+              ;;
+            *)
+              echo "::error::unknown pack kind '${{ steps.parse.outputs.kind }}'"
+              exit 1
+              ;;
+          esac
+          SHA=$(sha256sum "$OUT" | awk '{print $1}')
+          echo "tarball=$OUT"             >> "$GITHUB_OUTPUT"
+          echo "path=$PWD/$OUT"           >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA"              >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.parse.outputs.tag }}
+          name: "${{ steps.parse.outputs.framework }}/${{ steps.parse.outputs.plugin }} ${{ steps.parse.outputs.version }}"
+          body: |
+            **${{ steps.parse.outputs.framework }} · ${{ steps.parse.outputs.plugin }} · ${{ steps.parse.outputs.version }}**
+
+            Built from `${{ steps.parse.outputs.dir }}` (${{ steps.parse.outputs.kind }} pack).
+
+            ## Integrity
+            ```
+            sha256: ${{ steps.pack.outputs.sha256 }}
+            ```
+
+            ## How to install
+            Users don't install plugins manually. The Onepilot app resolves
+            the right tarball at runtime — bump the backend manifest and
+            agents pull on next start.
+          files: ${{ steps.pack.outputs.path }}

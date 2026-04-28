@@ -1,0 +1,16 @@
+[project]
+name = "hermes-onepilot-platform"
+version = "0.3.0"
+description = "Onepilot channel plugin for the Hermes agent framework. Bridges Onepilot app messages to a running Hermes gateway and posts assistant replies back so the app can deliver them as push notifications."
+authors = [{ name = "Onepilot" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.11"
+
+# Hermes itself ships httpx and websockets via its platform adapters, so
+# this plugin doesn't add a runtime dependency. Listed here for clarity
+# when the plugin is installed standalone (outside the Hermes install).
+dependencies = [
+  "httpx>=0.25",
+  "websockets>=11",
+]

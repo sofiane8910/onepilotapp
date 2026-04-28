@@ -1,0 +1,8 @@
+name: onepilot-skills
+version: 0.1.0
+description: Skill discovery surface for the Onepilot iOS app. Read-only — enumerates installed skills (filesystem + config + lock.json) and forwards Hermes' built-in browse_skills / inspect_skill helpers via skills_dump.py. Independent of the chat/cron onepilot plugin so updates ship in isolation.
+author: Onepilot
+kind: standalone
+requires_env: []
+provides_tools: []
+provides_hooks: []

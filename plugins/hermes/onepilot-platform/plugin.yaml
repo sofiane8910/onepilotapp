@@ -1,0 +1,8 @@
+name: onepilot
+version: 0.3.0
+description: Bridges Onepilot messages to this Hermes agent. Subscribes to the inbound channel for user prompts, posts assistant replies back so the Onepilot app can deliver them as push notifications, registers `onepilot` as a cron delivery channel so scheduled jobs land in the same chat, and exposes `hermes onepilot-commands --json` so the Onepilot iOS app can populate its chat + menu with this agent's live slash-command catalog.
+author: Onepilot
+kind: standalone
+requires_env: []
+provides_tools: []
+provides_hooks: []

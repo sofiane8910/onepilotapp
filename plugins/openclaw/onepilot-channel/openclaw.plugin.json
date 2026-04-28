@@ -1,0 +1,29 @@
+{
+  "id": "onepilot",
+  "name": "Onepilot",
+  "description": "Bridges Onepilot messages to OpenClaw agents. The agent loop runs server-side, so mobile force-quits and background termination don't interrupt in-flight turns.",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "accounts": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled":        { "type": "boolean" },
+            "backendUrl":     { "type": "string", "format": "uri" },
+            "streamUrl":      { "type": "string", "format": "uri" },
+            "publishableKey": { "type": "string", "minLength": 1 },
+            "agentKey":       { "type": "string", "minLength": 1 },
+            "userId":         { "type": "string", "minLength": 1 },
+            "agentProfileId": { "type": "string", "minLength": 1 },
+            "sessionKey":     { "type": "string", "minLength": 1 }
+          },
+          "required": ["backendUrl", "streamUrl", "publishableKey", "agentKey", "userId", "agentProfileId", "sessionKey"]
+        }
+      }
+    }
+  }
+}

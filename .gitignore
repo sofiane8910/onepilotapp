@@ -1,0 +1,12 @@
+node_modules/
+*.tgz
+.DS_Store
+tokens/
+
+# Local-only maintainer release notes — never commit
+CLAUDE.md
+
+# Python bytecode — generated when CI runs py_compile against plugin source
+__pycache__/
+*.pyc
+
