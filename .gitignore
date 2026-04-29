@@ -5,6 +5,7 @@ tokens/
 
 # Local-only maintainer release notes — never commit
 CLAUDE.md
+.local-notes/
 
 # Python bytecode — generated when CI runs py_compile against plugin source
 __pycache__/

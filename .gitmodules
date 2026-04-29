@@ -1,0 +1,9 @@
+[submodule "plugins/hermes/onepilot-skills"]
+	path = plugins/hermes/onepilot-skills
+	url = https://github.com/sofiane8910/onepilot-skills.git
+[submodule "plugins/hermes/onepilot-platform"]
+	path = plugins/hermes/onepilot-platform
+	url = https://github.com/sofiane8910/onepilot-platform.git
+[submodule "plugins/openclaw/onepilot-channel"]
+	path = plugins/openclaw/onepilot-channel
+	url = https://github.com/sofiane8910/onepilot-channel.git
