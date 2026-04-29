@@ -7,3 +7,6 @@
 [submodule "plugins/openclaw/onepilot-channel"]
 	path = plugins/openclaw/onepilot-channel
 	url = https://github.com/sofiane8910/onepilot-channel.git
+[submodule "plugins/openclaw/onepilot-openclaw-skills"]
+	path = plugins/openclaw/onepilot-openclaw-skills
+	url = https://github.com/sofiane8910/onepilot-openclaw-skills.git
