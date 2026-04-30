@@ -1,12 +1,12 @@
-[submodule "plugins/hermes/onepilot-skills"]
-	path = plugins/hermes/onepilot-skills
-	url = https://github.com/sofiane8910/onepilot-skills.git
-[submodule "plugins/hermes/onepilot-platform"]
-	path = plugins/hermes/onepilot-platform
-	url = https://github.com/sofiane8910/onepilot-platform.git
-[submodule "plugins/openclaw/onepilot-channel"]
-	path = plugins/openclaw/onepilot-channel
-	url = https://github.com/sofiane8910/onepilot-channel.git
+[submodule "plugins/hermes/onepilot-hermes-skills"]
+	path = plugins/hermes/onepilot-hermes-skills
+	url = https://github.com/sofiane8910/onepilot-hermes-skills.git
+[submodule "plugins/hermes/onepilot-hermes-chat"]
+	path = plugins/hermes/onepilot-hermes-chat
+	url = https://github.com/sofiane8910/onepilot-hermes-chat.git
+[submodule "plugins/openclaw/onepilot-openclaw-chat"]
+	path = plugins/openclaw/onepilot-openclaw-chat
+	url = https://github.com/sofiane8910/onepilot-openclaw-chat.git
 [submodule "plugins/openclaw/onepilot-openclaw-skills"]
 	path = plugins/openclaw/onepilot-openclaw-skills
 	url = https://github.com/sofiane8910/onepilot-openclaw-skills.git
