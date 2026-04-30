@@ -91,10 +91,10 @@ The agent layer comes from the same observation: running an AI agent on your ser
 ```mermaid
 flowchart TB
     A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
-    A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT&nbsp;<br/><sub>plugins/&lt;framework&gt;/</sub>"]
-    B ==> C["<b>🦀 &nbsp;OpenClaw</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
-    B ==> D["<b>⚔️ &nbsp;Hermes</b><br/><b>● &nbsp;LIVE</b><br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
-    B -.-> E["<b>🧷 &nbsp;Paperclip</b><br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
+    A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT<br/>plugins/&lt;framework&gt;/"]
+    B ==> C["🦀 &nbsp;OpenClaw<br/>● &nbsp;LIVE<br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
+    B ==> D["⚔️ &nbsp;Hermes<br/>● &nbsp;LIVE<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
+    B -.-> E["🧷 &nbsp;Paperclip<br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
 
     classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
     classDef pool fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
