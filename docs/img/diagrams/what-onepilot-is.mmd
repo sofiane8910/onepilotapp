@@ -1,0 +1,32 @@
+flowchart TB
+    P(["📱 &nbsp;&nbsp;ONEPILOT iOS&nbsp;&nbsp;"])
+
+    P ==> T["&nbsp;⌨️ &nbsp;&nbsp;PILLAR 1 &nbsp;&nbsp;·&nbsp;&nbsp; Modern mobile terminal&nbsp;"]
+    P ==> A["&nbsp;✦ &nbsp;&nbsp;PILLAR 2 &nbsp;&nbsp;·&nbsp;&nbsp; AI agent ops&nbsp;"]
+
+    T --> T1["Real SSH &nbsp;·&nbsp; mosh &nbsp;·&nbsp; port forward"]
+    T1 --> T2["Directory browser &nbsp;·&nbsp; file reader &nbsp;·&nbsp; editor"]
+    T2 --> T3["localhost preview in-app browser"]
+    T3 --> T4["GitHub PRs &nbsp;·&nbsp; repos &nbsp;·&nbsp; Actions"]
+    T4 --> T5["Cron monitor"]
+
+    A --> A1["Deploy an agent in &lt; 60 seconds"]
+    A1 --> A2["Chat with your agents from your phone"]
+    A2 --> A3["Cron jobs &nbsp;·&nbsp; run-now &nbsp;·&nbsp; tail logs"]
+    A3 --> A4["Push notification when work finishes"]
+    A4 --> A5["Bring your own LLM key &nbsp;·&nbsp; Claude, GPT, OSS"]
+
+    linkStyle 0,1 stroke:#0a0a0a,stroke-width:2px
+    linkStyle 2,3,4,5,6 stroke:#0cce6b,stroke-width:1.5px
+    linkStyle 7,8,9,10,11 stroke:#0070f3,stroke-width:1.5px
+
+    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
+    classDef pillar1 fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
+    classDef pillar2 fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
+    classDef leaf1 fill:#ffffff,stroke:#bbf7d0,color:#0a0a0a
+    classDef leaf2 fill:#ffffff,stroke:#bfdbfe,color:#0a0a0a
+    class P root
+    class T pillar1
+    class A pillar2
+    class T1,T2,T3,T4,T5 leaf1
+    class A1,A2,A3,A4,A5 leaf2

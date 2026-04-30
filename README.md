@@ -26,53 +26,21 @@ You get a real SSH terminal — and around it, the rest of the modern dev workfl
 
 ## What Onepilot is
 
-```mermaid
-flowchart TB
-    P(["📱 &nbsp;&nbsp;ONEPILOT iOS&nbsp;&nbsp;"])
+<p align="center">
+  <img src="docs/img/what-onepilot-is.png" alt="Onepilot's two pillars: a modern mobile terminal and AI agent ops" width="900"/>
+</p>
 
-    P ==> T["&nbsp;⌨️ &nbsp;&nbsp;PILLAR 1 &nbsp;&nbsp;·&nbsp;&nbsp; Modern mobile terminal&nbsp;"]
-    P ==> A["&nbsp;✦ &nbsp;&nbsp;PILLAR 2 &nbsp;&nbsp;·&nbsp;&nbsp; AI agent ops&nbsp;"]
-
-    T --> T1["Real SSH &nbsp;·&nbsp; mosh &nbsp;·&nbsp; port forward"]
-    T1 --> T2["Directory browser &nbsp;·&nbsp; file reader &nbsp;·&nbsp; editor"]
-    T2 --> T3["localhost preview in-app browser"]
-    T3 --> T4["GitHub PRs &nbsp;·&nbsp; repos &nbsp;·&nbsp; Actions"]
-    T4 --> T5["Cron monitor"]
-
-    A --> A1["Deploy an agent in &lt; 60 seconds"]
-    A1 --> A2["Chat with your agents from your phone"]
-    A2 --> A3["Cron jobs &nbsp;·&nbsp; run-now &nbsp;·&nbsp; tail logs"]
-    A3 --> A4["Push notification when work finishes"]
-    A4 --> A5["Bring your own LLM key &nbsp;·&nbsp; Claude, GPT, OSS"]
-
-    linkStyle 0,1 stroke:#0a0a0a,stroke-width:2px
-    linkStyle 2,3,4,5,6 stroke:#0cce6b,stroke-width:1.5px
-    linkStyle 7,8,9,10,11 stroke:#0070f3,stroke-width:1.5px
-
-    classDef root fill:#0a0a0a,stroke:#0a0a0a,color:#fff,font-weight:bold
-    classDef pillar1 fill:#f0fdf4,stroke:#0cce6b,color:#0a0a0a,font-weight:bold
-    classDef pillar2 fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
-    classDef leaf1 fill:#ffffff,stroke:#bbf7d0,color:#0a0a0a
-    classDef leaf2 fill:#ffffff,stroke:#bfdbfe,color:#0a0a0a
-    class P root
-    class T pillar1
-    class A pillar2
-    class T1,T2,T3,T4,T5 leaf1
-    class A1,A2,A3,A4,A5 leaf2
-```
+<!-- Source: docs/img/diagrams/what-onepilot-is.mmd · regenerate: npm i -g @mermaid-js/mermaid-cli && mmdc -i docs/img/diagrams/what-onepilot-is.mmd -o docs/img/what-onepilot-is.png -w 1600 -b transparent -->
 
 <br>
 
 ## How agents work
 
-```mermaid
-flowchart LR
-    A["📱 Onepilot"] -- "chat / cron" --> B[("🔄 Realtime sync")]
-    B -- "encrypted" --> C["🖥 Your server"]
-    C --> D["🤖 OpenClaw runtime"]
-    D -- "results" --> B
-    B -- "🔔 push" --> A
-```
+<p align="center">
+  <img src="docs/img/how-agents-work.png" alt="Onepilot ↔ realtime sync ↔ your server's OpenClaw runtime, with push notifications" width="900"/>
+</p>
+
+<!-- Source: docs/img/diagrams/how-agents-work.mmd -->
 
 Spin up an agent on your own server with a guided wizard. No YAML to edit, no Telegram bot to babysit. Talk to it directly from the app.
 
@@ -88,25 +56,11 @@ The agent layer comes from the same observation: running an AI agent on your ser
 
 ## The repo: framework adapter pool
 
-```mermaid
-flowchart TB
-    A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
-    A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT<br/>plugins/&lt;framework&gt;/"]
-    B ==> C["🦀 &nbsp;OpenClaw<br/>● &nbsp;LIVE<br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
-    B ==> D["⚔️ &nbsp;Hermes<br/>● &nbsp;LIVE<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
-    B -.-> E["🧷 &nbsp;Paperclip<br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
+<p align="center">
+  <img src="docs/img/framework-pool.png" alt="Public plugin pool: OpenClaw and Hermes live, Paperclip next" width="900"/>
+</p>
 
-    classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
-    classDef pool fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
-    classDef openclaw fill:#fff7ed,stroke:#fb923c,color:#0a0a0a,font-weight:bold
-    classDef hermes fill:#f0fdf4,stroke:#14532d,color:#0a0a0a,font-weight:bold
-    classDef paperclip fill:#fafafa,stroke:#d4d4d4,color:#666
-    class A root
-    class B pool
-    class C openclaw
-    class D hermes
-    class E paperclip
-```
+<!-- Source: docs/img/diagrams/framework-pool.mmd -->
 
 This repo is the **public plugin pool** that powers Onepilot's agent pillar. Every framework we integrate with ships its adapter here. When you pair a server in the app, the right adapter is fetched automatically.
 

@@ -1,0 +1,6 @@
+flowchart LR
+    A["📱 Onepilot"] -- "chat / cron" --> B[("🔄 Realtime sync")]
+    B -- "encrypted" --> C["🖥 Your server"]
+    C --> D["🤖 OpenClaw runtime"]
+    D -- "results" --> B
+    B -- "🔔 push" --> A

@@ -1,0 +1,17 @@
+flowchart TB
+    A(["📱 &nbsp;ONEPILOT iOS&nbsp;"])
+    A -- "pair a server &nbsp;·&nbsp; pick a framework" --> B["📦 &nbsp;PUBLIC PLUGIN POOL &nbsp;·&nbsp; this repo &nbsp;·&nbsp; MIT<br/>plugins/&lt;framework&gt;/"]
+    B ==> C["🦀 &nbsp;OpenClaw<br/>● &nbsp;LIVE<br/>━━━━━━━━━━━━━━━<br/>chat<br/>cron<br/>multi-agent<br/>push alerts"]
+    B ==> D["⚔️ &nbsp;Hermes<br/>● &nbsp;LIVE<br/>━━━━━━━━━━━━━━━<br/>persistent-memory chat<br/>gateway mirror"]
+    B -.-> E["🧷 &nbsp;Paperclip<br/>○ &nbsp;NEXT<br/>━━━━━━━━━━━━━━━<br/>agent-company dashboard<br/>budgets &nbsp;·&nbsp; org chart"]
+
+    classDef root fill:#0070f3,stroke:#0058c4,color:#fff,font-weight:bold
+    classDef pool fill:#eff6ff,stroke:#0070f3,color:#0a0a0a,font-weight:bold
+    classDef openclaw fill:#fff7ed,stroke:#fb923c,color:#0a0a0a,font-weight:bold
+    classDef hermes fill:#f0fdf4,stroke:#14532d,color:#0a0a0a,font-weight:bold
+    classDef paperclip fill:#fafafa,stroke:#d4d4d4,color:#666
+    class A root
+    class B pool
+    class C openclaw
+    class D hermes
+    class E paperclip
